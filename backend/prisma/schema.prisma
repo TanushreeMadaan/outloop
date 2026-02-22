@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum EntityType {
+  USER
+  DEPARTMENT
+  VENDOR
+  ITEM
+  TRANSACTION
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  transactions Transaction[]
+}
+
+model Vendor {
+  id        String   @id @default(uuid())
+  name      String
+  address   String?
+  email     String?
+  phoneNo   String?
+  gstNumber String?
+  createdAt DateTime @default(now())
+  transactions Transaction[]
+  deletedAt DateTime?
+}
+
+model Item {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  transactionItems TransactionItem[]
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  isReturnable  Boolean
+  remarks       String?
+  vendorId      String
+  departmentId  String
+  createdById   String
+  createdAt     DateTime @default(now())
+
+  vendor        Vendor     @relation(fields: [vendorId], references: [id])
+  department    Department @relation(fields: [departmentId], references: [id])
+  items         TransactionItem[]
+}
+
+model TransactionItem {
+  id            String @id @default(uuid())
+  transactionId String
+  itemId        String
+
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  item          Item        @relation(fields: [itemId], references: [id])
+
+  @@unique([transactionId, itemId])
+}
+
+model AuditLog {
+  id            String      @id @default(uuid())
+  entityType    EntityType
+  entityId      String
+  action        AuditAction
+  oldValue      Json?
+  newValue      Json?
+  performedById String
+  createdAt     DateTime @default(now())
+}
