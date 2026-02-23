@@ -7,14 +7,8 @@ import { ItemModal } from "@/components/ItemModal";
 import { Button } from "@/components/ui/button";
 import { BackgroundGradients } from "@/components/BackgroundGradients";
 import { ItemSkeleton } from "@/components/ItemSkeleton";
+import { Item } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-
-export interface Item {
-    id: string;
-    name: string;
-    description?: string;
-    createdAt: string;
-}
 
 export default function ItemsPage() {
     const queryClient = useQueryClient();

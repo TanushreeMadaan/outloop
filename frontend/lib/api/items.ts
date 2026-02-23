@@ -1,5 +1,5 @@
 import api from "../api"
-import { Item } from "@/app/(dashboard)/items/page"
+import { Item } from "@/types"
 
 export const getItems = async (): Promise<Item[]> => {
     const res = await api.get("/items")

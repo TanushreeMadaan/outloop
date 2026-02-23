@@ -7,11 +7,18 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { QueryTransactionDto } from './dto/query-transaction.dto';
 
+import { AuditService } from '../audit/audit.service';
+import { AuditAction, EntityType } from '@prisma/client';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
+
 @Injectable()
 export class TransactionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private auditService: AuditService,
+  ) { }
 
-  async create(data: CreateTransactionDto) {
+  async create(data: CreateTransactionDto, userId: string) {
     const { vendorId, departmentId, itemIds, isReturnable, remarks } = data;
 
     // Validating vendor
@@ -38,14 +45,14 @@ export class TransactionService {
     }
 
     // Atomic transaction
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const transaction = await tx.transaction.create({
         data: {
           vendorId,
           departmentId,
           isReturnable,
           remarks,
-          createdById: 'temp-user-id', // todo: replace after auth
+          createdById: userId,
         },
       });
 
@@ -56,6 +63,93 @@ export class TransactionService {
 
       await tx.transactionItem.createMany({
         data: transactionItems,
+      });
+
+      return transaction;
+    });
+
+    await this.auditService.log({
+      entityType: EntityType.TRANSACTION,
+      entityId: result.id,
+      action: AuditAction.CREATE,
+      newValue: result,
+      performedById: userId,
+    });
+
+    return result;
+  }
+
+  async update(id: string, data: UpdateTransactionDto, userId: string) {
+    const existing = await this.prisma.transaction.findUnique({
+      where: { id },
+      include: { items: true },
+    });
+
+    if (!existing) throw new NotFoundException('Transaction not found');
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const { itemIds, ...otherData } = data;
+
+      const transaction = await tx.transaction.update({
+        where: { id },
+        data: otherData,
+      });
+
+      if (itemIds) {
+        // Simple strategy: delete all and recreate
+        await tx.transactionItem.deleteMany({
+          where: { transactionId: id },
+        });
+
+        await tx.transactionItem.createMany({
+          data: itemIds.map((itemId) => ({
+            transactionId: id,
+            itemId,
+          })),
+        });
+      }
+
+      return tx.transaction.findUnique({
+        where: { id },
+        include: { items: true },
+      });
+    });
+
+    await this.auditService.log({
+      entityType: EntityType.TRANSACTION,
+      entityId: id,
+      action: AuditAction.UPDATE,
+      oldValue: existing as any,
+      newValue: result as any,
+      performedById: userId,
+    });
+
+    return result;
+  }
+
+  async remove(id: string, userId: string) {
+    const existing = await this.prisma.transaction.findUnique({
+      where: { id },
+    });
+
+    if (!existing) throw new NotFoundException('Transaction not found');
+
+    return this.prisma.$transaction(async (tx) => {
+      // First delete transaction items
+      await tx.transactionItem.deleteMany({
+        where: { transactionId: id },
+      });
+
+      const transaction = await tx.transaction.delete({
+        where: { id },
+      });
+
+      await this.auditService.log({
+        entityType: EntityType.TRANSACTION,
+        entityId: id,
+        action: AuditAction.DELETE,
+        oldValue: existing as any,
+        performedById: userId,
       });
 
       return transaction;

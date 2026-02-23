@@ -7,17 +7,8 @@ import { VendorModal } from "@/components/VendorModal";
 import { Button } from "@/components/ui/button";
 import { BackgroundGradients } from "@/components/BackgroundGradients";
 import { ItemSkeleton } from "@/components/ItemSkeleton";
+import { Vendor } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-
-export interface Vendor {
-  id: string;
-  name: string;
-  address?: string;
-  email?: string;
-  phoneNo?: string;
-  gstNumber?: string;
-  createdAt: string;
-}
 
 export default function VendorsPage() {
   const queryClient = useQueryClient();
