@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class DashboardService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getSummary() {
     const [
@@ -27,6 +27,9 @@ export class DashboardService {
         include: {
           vendor: true,
           department: true,
+          items: {
+            include: { item: true },
+          },
         },
       }),
     ]);
