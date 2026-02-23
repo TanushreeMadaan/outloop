@@ -4,7 +4,7 @@ import { CreateDepartmentDto } from './dto/create-department.dto';
 
 @Injectable()
 export class DepartmentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   create(data: CreateDepartmentDto) {
     return this.prisma.department.create({
@@ -15,6 +15,19 @@ export class DepartmentService {
   findAll() {
     return this.prisma.department.findMany({
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  update(id: string, data: { name: string }) {
+    return this.prisma.department.update({
+      where: { id },
+      data,
+    });
+  }
+
+  remove(id: string) {
+    return this.prisma.department.delete({
+      where: { id },
     });
   }
 }

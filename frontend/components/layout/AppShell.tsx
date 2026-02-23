@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getMe } from "@/lib/api/auth"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Menu, LogOut, User, ChevronRight, LayoutDashboard, Store, Package, Repeat } from "lucide-react"
+import { Menu, LogOut, User, ChevronRight, LayoutDashboard, Store, Package, Repeat, Activity } from "lucide-react"
 
 export default function AppShell({
   children,
@@ -34,7 +34,11 @@ export default function AppShell({
     { href: "/vendors", label: "Vendors", icon: Store },
     { href: "/items", label: "Items", icon: Package },
     { href: "/transactions", label: "Transactions", icon: Repeat },
+    { href: "/departments", label: "Departments", icon: Store, adminOnly: true },
+    { href: "/audit", label: "Audit Logs", icon: Activity, adminOnly: true },
   ]
+
+  const filteredNavItems = navItems.filter(item => !item.adminOnly || user?.role === 'ADMIN')
 
   const SidebarContent = ({ isMobile = false }) => (
     <div className="flex flex-col h-full bg-white">
@@ -60,8 +64,8 @@ export default function AppShell({
         )}
       </div>
 
-      <nav className="flex flex-col gap-1.5 px-3 py-4 flex-1">
-        {navItems.map((item) => {
+      <nav className="flex flex-col gap-1.5 px-3 py-4 flex-1 overflow-y-auto">
+        {filteredNavItems.map((item) => {
           const isActive = pathname === item.href
           return (
             <Link
