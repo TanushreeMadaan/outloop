@@ -5,7 +5,7 @@ import { QueryAuditDto } from './dto/query-audit.dto';
 
 @Injectable()
 export class AuditService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async log(params: {
     entityType: EntityType;
@@ -32,7 +32,16 @@ export class AuditService {
       [query.sortBy || 'createdAt']: query.sortOrder || 'desc',
     };
 
+    const where: any = {};
+    if (query.entityType) {
+      where.entityType = query.entityType;
+    }
+    if (query.entityId) {
+      where.entityId = query.entityId;
+    }
+
     return this.prisma.auditLog.findMany({
+      where,
       orderBy,
     });
   }

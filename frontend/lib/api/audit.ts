@@ -14,7 +14,7 @@ export interface AuditLog {
     };
 }
 
-export const getAuditLogs = async (params?: any): Promise<AuditLog[]> => {
+export const getAuditLogs = async (params?: Partial<AuditLog>): Promise<AuditLog[]> => {
     const res = await api.get("/audit-logs", { params });
     return res.data;
 };
