@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
@@ -42,13 +43,16 @@ export default function AppShell({
 
   const SidebarContent = ({ isMobile = false }) => (
     <div className="flex flex-col h-full bg-white">
-      <div className={`p-4 flex items-center gap-3 border-b border-gray-100/50 ${collapsed && !isMobile ? "justify-center" : "justify-between"}`}>
-        <div className="flex items-center gap-2 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white text-xs flex-shrink-0 shadow-sm shadow-purple-900/10">
-            OL
-          </div>
+      <div className={`px-4 flex items-center gap-3 border-b border-gray-100/50 ${collapsed && !isMobile ? "justify-center" : "justify-between"}`}>
+        <div className="flex items-center gap-2">
           {(!collapsed || isMobile) && (
-            <span className="font-bold text-lg tracking-tight text-purple-900 truncate uppercase">outLoop</span>
+            <Image
+              src="/logo-no-bg.png"
+              alt="Logo"
+              width={120}
+              height={70}
+              className="rounded-lg"
+            />
           )}
         </div>
 
