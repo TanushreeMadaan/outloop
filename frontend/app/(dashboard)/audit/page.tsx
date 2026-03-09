@@ -36,6 +36,33 @@ export default function AuditLogsPage() {
         return String(val);
     };
 
+    const getDelta = (oldValue: any, newValue: any) => {
+        if (!oldValue || !newValue || typeof oldValue !== "object" || typeof newValue !== "object") {
+            return null;
+        }
+
+        const keys = Array.from(
+            new Set([
+                ...Object.keys(oldValue as Record<string, unknown>),
+                ...Object.keys(newValue as Record<string, unknown>),
+            ]),
+        );
+
+        const changes = keys
+            .filter((key) => {
+                const before = (oldValue as Record<string, unknown>)[key];
+                const after = (newValue as Record<string, unknown>)[key];
+                return JSON.stringify(before) !== JSON.stringify(after);
+            })
+            .map((key) => ({
+                key,
+                before: (oldValue as Record<string, unknown>)[key],
+                after: (newValue as Record<string, unknown>)[key],
+            }));
+
+        return changes.length ? changes : null;
+    };
+
     return (
         <div className="relative min-h-[calc(100vh-100px)] space-y-8 p-4 md:p-8 overflow-hidden font-[family-name:var(--font-geist-sans)]">
             <BackgroundGradients />
@@ -136,12 +163,47 @@ export default function AuditLogsPage() {
                                                                     Previous State
                                                                 </h4>
                                                                 <div className="p-6 rounded-3xl bg-red-50/30 border border-red-100/50 backdrop-blur-sm">
-                                                                    {log.oldValue ? (
+                                                                    {log.action === "UPDATE" && log.oldValue && log.newValue ? (
+                                                                        (() => {
+                                                                            const delta = getDelta(log.oldValue, log.newValue);
+                                                                            if (!delta) {
+                                                                                return (
+                                                                                    <div className="text-[11px] text-red-300 italic">
+                                                                                        No field-level changes detected
+                                                                                    </div>
+                                                                                );
+                                                                            }
+                                                                            return (
+                                                                                <div className="space-y-3">
+                                                                                    {delta.map(({ key, before }) => (
+                                                                                        <div
+                                                                                            key={key}
+                                                                                            className="flex flex-col gap-1 border-b border-red-100/20 pb-2 last:border-0 last:pb-0"
+                                                                                        >
+                                                                                            <span className="text-[9px] font-bold text-red-400 uppercase tracking-tight">
+                                                                                                {key}
+                                                                                            </span>
+                                                                                            <span className="text-[11px] font-bold text-red-900 break-all">
+                                                                                                {renderValue(before)}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            );
+                                                                        })()
+                                                                    ) : log.oldValue ? (
                                                                         <div className="space-y-3">
                                                                             {Object.entries(log.oldValue as object).map(([key, val]) => (
-                                                                                <div key={key} className="flex flex-col gap-1 border-b border-red-100/20 pb-2 last:border-0 last:pb-0">
-                                                                                    <span className="text-[9px] font-bold text-red-400 uppercase tracking-tight">{key}</span>
-                                                                                    <span className="text-[11px] font-bold text-red-900 break-all">{renderValue(val)}</span>
+                                                                                <div
+                                                                                    key={key}
+                                                                                    className="flex flex-col gap-1 border-b border-red-100/20 pb-2 last:border-0 last:pb-0"
+                                                                                >
+                                                                                    <span className="text-[9px] font-bold text-red-400 uppercase tracking-tight">
+                                                                                        {key}
+                                                                                    </span>
+                                                                                    <span className="text-[11px] font-bold text-red-900 break-all">
+                                                                                        {renderValue(val)}
+                                                                                    </span>
                                                                                 </div>
                                                                             ))}
                                                                         </div>
@@ -160,12 +222,47 @@ export default function AuditLogsPage() {
                                                                     Current State
                                                                 </h4>
                                                                 <div className="p-6 rounded-3xl bg-emerald-50/30 border border-emerald-100/50 backdrop-blur-sm">
-                                                                    {log.newValue ? (
+                                                                    {log.action === "UPDATE" && log.oldValue && log.newValue ? (
+                                                                        (() => {
+                                                                            const delta = getDelta(log.oldValue, log.newValue);
+                                                                            if (!delta) {
+                                                                                return (
+                                                                                    <div className="text-[11px] text-emerald-300 italic">
+                                                                                        No field-level changes detected
+                                                                                    </div>
+                                                                                );
+                                                                            }
+                                                                            return (
+                                                                                <div className="space-y-3">
+                                                                                    {delta.map(({ key, after }) => (
+                                                                                        <div
+                                                                                            key={key}
+                                                                                            className="flex flex-col gap-1 border-b border-emerald-100/20 pb-2 last:border-0 last:pb-0"
+                                                                                        >
+                                                                                            <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-tight">
+                                                                                                {key}
+                                                                                            </span>
+                                                                                            <span className="text-[11px] font-bold text-emerald-900 break-all">
+                                                                                                {renderValue(after)}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            );
+                                                                        })()
+                                                                    ) : log.newValue ? (
                                                                         <div className="space-y-3">
                                                                             {Object.entries(log.newValue as object).map(([key, val]) => (
-                                                                                <div key={key} className="flex flex-col gap-1 border-b border-emerald-100/20 pb-2 last:border-0 last:pb-0">
-                                                                                    <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-tight">{key}</span>
-                                                                                    <span className="text-[11px] font-bold text-emerald-900 break-all">{renderValue(val)}</span>
+                                                                                <div
+                                                                                    key={key}
+                                                                                    className="flex flex-col gap-1 border-b border-emerald-100/20 pb-2 last:border-0 last:pb-0"
+                                                                                >
+                                                                                    <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-tight">
+                                                                                        {key}
+                                                                                    </span>
+                                                                                    <span className="text-[11px] font-bold text-emerald-900 break-all">
+                                                                                        {renderValue(val)}
+                                                                                    </span>
                                                                                 </div>
                                                                             ))}
                                                                         </div>
