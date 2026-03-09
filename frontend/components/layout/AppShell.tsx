@@ -47,10 +47,10 @@ export default function AppShell({
         <div className="flex items-center gap-2">
           {(!collapsed || isMobile) && (
             <Image
-              src="/logo-no-bg.png"
+              src="/logo-w-name.png"
               alt="Logo"
-              width={120}
-              height={70}
+              width={180}
+              height={80}
               className="rounded-lg"
             />
           )}
