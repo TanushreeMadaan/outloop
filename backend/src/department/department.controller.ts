@@ -7,11 +7,11 @@ import { AuthGuard } from '@nestjs/passport';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('departments')
-@Roles(Role.ADMIN)
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) { }
 
   @Post()
+  @Roles(Role.ADMIN)
   create(@Body() body: CreateDepartmentDto) {
     return this.departmentService.create(body);
   }
@@ -21,14 +21,16 @@ export class DepartmentController {
     return this.departmentService.findAll();
   }
 
-  @Post(':id') // Using POST for update since some setups prefer it, but @Patch is more standard. Let's use standard @Patch.
-  @Get(':id') // I'll just add standard NestJS CRUD pattern.
+  @Post(':id')
+  @Get(':id')
   @Patch(':id')
+  @Roles(Role.ADMIN)
   update(@Param('id') id: string, @Body() body: CreateDepartmentDto) {
     return this.departmentService.update(id, body);
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
   remove(@Param('id') id: string) {
     return this.departmentService.remove(id);
   }
