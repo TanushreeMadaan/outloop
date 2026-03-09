@@ -40,9 +40,30 @@ export class AuditService {
       where.entityId = query.entityId;
     }
 
-    return this.prisma.auditLog.findMany({
+    const logs = await this.prisma.auditLog.findMany({
       where,
       orderBy,
+    });
+
+    const performedByIds = Array.from(
+      new Set(logs.map((l) => l.performedById).filter(Boolean)),
+    );
+
+    const users = performedByIds.length
+      ? await this.prisma.user.findMany({
+          where: { id: { in: performedByIds } },
+          select: { id: true, email: true },
+        })
+      : [];
+
+    const emailByUserId = new Map(users.map((u) => [u.id, u.email]));
+
+    return logs.map((log) => {
+      const email = emailByUserId.get(log.performedById);
+      return {
+        ...log,
+        performedBy: email ? { email } : undefined,
+      };
     });
   }
 }
