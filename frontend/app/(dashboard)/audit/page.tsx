@@ -7,11 +7,12 @@ import { Calendar, User, Activity, ShieldCheck, ChevronDown, ChevronUp, ArrowRig
 import { useMemo, useState } from "react";
 import { Pagination } from "@/components/Pagination";
 import { TableSkeleton } from "@/components/TableSkeleton";
+import { DateRangePicker } from "@/components/DateRangePicker";
+import { DateRange } from "react-day-picker";
 
 export default function AuditLogsPage() {
     const [expandedIds, setExpandedIds] = useState<string[]>([]);
-    const [fromDate, setFromDate] = useState("");
-    const [toDate, setToDate] = useState("");
+    const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [page, setPage] = useState(1);
     const pageSize = 15;
 
@@ -71,15 +72,11 @@ export default function AuditLogsPage() {
     const filteredLogs = useMemo(() => {
         if (!logs) return [];
 
-        let startDate: Date | null = null;
+        let startDate: Date | null = dateRange?.from || null;
         let endExclusive: Date | null = null;
 
-        if (fromDate) {
-            startDate = new Date(fromDate);
-        }
-        if (toDate) {
-            const d = new Date(toDate);
-            endExclusive = new Date(d.getTime() + 24 * 60 * 60 * 1000);
+        if (dateRange?.to) {
+            endExclusive = new Date(dateRange.to.getTime() + 24 * 60 * 60 * 1000);
         }
 
         return logs.filter((log) => {
@@ -90,7 +87,7 @@ export default function AuditLogsPage() {
 
             return true;
         });
-    }, [logs, fromDate, toDate]);
+    }, [logs, dateRange]);
 
     const paginatedLogs = useMemo(() => {
         const start = (page - 1) * pageSize;
@@ -113,32 +110,16 @@ export default function AuditLogsPage() {
                     </div>
                 </div>
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-                    <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
-                            From
+                    <div className="flex flex-col gap-1 w-full md:w-72">
+                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest ml-1">
+                            Date Range
                         </label>
-                        <input
-                            type="date"
-                            value={fromDate}
-                            onChange={(e) => {
-                                setFromDate(e.target.value);
+                        <DateRangePicker
+                            date={dateRange}
+                            setDate={(range) => {
+                                setDateRange(range);
                                 setPage(1);
                             }}
-                            className="w-full md:w-auto rounded-2xl border bg-white/60 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-200"
-                        />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
-                            To
-                        </label>
-                        <input
-                            type="date"
-                            value={toDate}
-                            onChange={(e) => {
-                                setToDate(e.target.value);
-                                setPage(1);
-                            }}
-                            className="w-full md:w-auto rounded-2xl border bg-white/60 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-200"
                         />
                     </div>
                 </div>

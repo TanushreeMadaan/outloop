@@ -9,12 +9,13 @@ import { BackgroundGradients } from "@/components/BackgroundGradients";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/Pagination";
 import { TableSkeleton } from "@/components/TableSkeleton";
+import { DateRangePicker } from "@/components/DateRangePicker";
+import { DateRange } from "react-day-picker";
 
 export default function TransactionsPage() {
     const queryClient = useQueryClient();
     const [searchQuery, setSearchQuery] = useState("");
-    const [fromDate, setFromDate] = useState("");
-    const [toDate, setToDate] = useState("");
+    const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
     const [page, setPage] = useState(1);
@@ -54,15 +55,11 @@ export default function TransactionsPage() {
     const filteredTransactions = useMemo(() => {
         const q = searchQuery.toLowerCase();
 
-        let startDate: Date | null = null;
+        let startDate: Date | null = dateRange?.from || null;
         let endExclusive: Date | null = null;
 
-        if (fromDate) {
-            startDate = new Date(fromDate);
-        }
-        if (toDate) {
-            const d = new Date(toDate);
-            endExclusive = new Date(d.getTime() + 24 * 60 * 60 * 1000);
+        if (dateRange?.to) {
+            endExclusive = new Date(dateRange.to.getTime() + 24 * 60 * 60 * 1000);
         }
 
         return transactions.filter((t: Transaction) => {
@@ -79,7 +76,7 @@ export default function TransactionsPage() {
                 t.remarks?.toLowerCase().includes(q)
             );
         });
-    }, [transactions, searchQuery, fromDate, toDate]);
+    }, [transactions, searchQuery, dateRange]);
 
     const paginatedTransactions = useMemo(() => {
         const start = (page - 1) * pageSize;
@@ -158,32 +155,16 @@ export default function TransactionsPage() {
                     />
                 </div>
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-                    <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
-                            From
+                    <div className="flex flex-col gap-1 w-full md:w-72">
+                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest ml-1">
+                            Date Range
                         </label>
-                        <input
-                            type="date"
-                            value={fromDate}
-                            onChange={(e) => {
-                                setFromDate(e.target.value);
+                        <DateRangePicker
+                            date={dateRange}
+                            setDate={(range) => {
+                                setDateRange(range);
                                 setPage(1);
                             }}
-                            className="w-full md:w-auto rounded-2xl border bg-white/60 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-200"
-                        />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
-                            To
-                        </label>
-                        <input
-                            type="date"
-                            value={toDate}
-                            onChange={(e) => {
-                                setToDate(e.target.value);
-                                setPage(1);
-                            }}
-                            className="w-full md:w-auto rounded-2xl border bg-white/60 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-200"
                         />
                     </div>
                 </div>
@@ -192,7 +173,7 @@ export default function TransactionsPage() {
             {isLoading ? (
                 <div className="w-full overflow-hidden rounded-2xl border bg-white/60 backdrop-blur-md shadow-sm">
                     <div className="p-4">
-                        <TableSkeleton columns={6} rows={8} />
+                        <TableSkeleton columns={7} rows={8} />
                     </div>
                 </div>
             ) : (
@@ -202,7 +183,8 @@ export default function TransactionsPage() {
                             <thead>
                                 <tr className="border-b bg-gray-50/50 text-[11px] font-bold uppercase tracking-wider text-gray-500">
                                     <th className="px-6 py-4">ID & Date</th>
-                                    <th className="px-6 py-4">Source / Destination</th>
+                                    <th className="px-6 py-4">Vendor</th>
+                                    <th className="px-6 py-4">Department</th>
                                     <th className="px-6 py-4">Items</th>
                                     <th className="px-6 py-4">Type</th>
                                     <th className="px-6 py-4">Remarks</th>
@@ -230,13 +212,10 @@ export default function TransactionsPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2 text-sm">
-                                                <span className="font-semibold text-gray-900">{transaction.vendor.name}</span>
-                                                <svg className="h-3 w-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                                </svg>
-                                                <span className="font-medium text-purple-700">{transaction.department.name}</span>
-                                            </div>
+                                            <span className="text-sm font-semibold text-gray-900">{transaction.vendor.name}</span>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <span className="text-sm font-medium text-purple-700">{transaction.department.name}</span>
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex flex-wrap gap-1.5 max-w-[240px]">
@@ -252,8 +231,8 @@ export default function TransactionsPage() {
                                         </td>
                                         <td className="px-6 py-5 text-sm">
                                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${transaction.isReturnable
-                                                    ? "bg-amber-50 text-amber-600 border border-amber-100"
-                                                    : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                                ? "bg-amber-50 text-amber-600 border border-amber-100"
+                                                : "bg-emerald-50 text-emerald-600 border border-emerald-100"
                                                 }`}>
                                                 {transaction.isReturnable ? "Returnable" : "Non-Returnable"}
                                             </span>
