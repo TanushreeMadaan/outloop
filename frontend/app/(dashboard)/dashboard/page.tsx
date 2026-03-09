@@ -122,7 +122,8 @@ export default function DashboardPage() {
               <thead>
                 <tr className="border-b bg-gray-50/50 text-[10px] font-bold uppercase tracking-wider text-gray-500">
                   <th className="px-6 py-3.5">ID & Date</th>
-                  <th className="px-6 py-3.5">Source / Destination</th>
+                  <th className="px-6 py-3.5">Vendor</th>
+                  <th className="px-6 py-3.5">Department</th>
                   <th className="px-6 py-3.5">Summary</th>
                   <th className="px-6 py-3.5 text-right">Type</th>
                 </tr>
@@ -144,9 +145,10 @@ export default function DashboardPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-[13px]">
                         <span className="font-semibold text-gray-800">{transaction.vendor.name}</span>
-                        <svg className="h-3 w-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-[13px]">
                         <span className="font-medium text-purple-700">{transaction.department.name}</span>
                       </div>
                     </td>
@@ -159,8 +161,8 @@ export default function DashboardPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tight ${transaction.isReturnable
-                          ? "bg-amber-50 text-amber-600 border border-amber-100"
-                          : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                        ? "bg-amber-50 text-amber-600 border border-amber-100"
+                        : "bg-emerald-50 text-emerald-600 border border-emerald-100"
                         }`}>
                         {transaction.isReturnable ? "Returnable" : "Non-Returnable"}
                       </span>
