@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Store, Calendar, ArrowRight, Pencil, Trash2, Check, X, Loader2 } from "lucide-react";
 import { ItemSkeleton } from "@/components/ItemSkeleton";
 import { Department } from "@/types";
+import { Pagination } from "@/components/Pagination";
 
 export default function DepartmentsPage() {
     const queryClient = useQueryClient();
@@ -17,6 +18,8 @@ export default function DepartmentsPage() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState("");
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const pageSize = 9;
 
     const { data: departments, isLoading } = useQuery({
         queryKey: ["departments"],
@@ -74,6 +77,13 @@ export default function DepartmentsPage() {
         if (!editName.trim() || !editingId) return;
         updateMutation.mutate({ id: editingId, name: editName });
     };
+
+    const paginatedDepartments = (() => {
+        const all = departments || [];
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        return all.slice(start, end);
+    })();
 
     return (
         <div className="relative min-h-[calc(100vh-100px)] space-y-8 p-4 md:p-8 overflow-hidden font-[family-name:var(--font-geist-sans)]">
@@ -134,7 +144,7 @@ export default function DepartmentsPage() {
                         <ItemSkeleton />
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                            {departments?.map((dept) => (
+                            {paginatedDepartments.map((dept) => (
                                 <Card key={dept.id} className="group overflow-hidden rounded-2xl border bg-white/60 backdrop-blur-md transition-all hover:shadow-xl hover:shadow-purple-900/5 border-gray-100 relative">
                                     <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         {editingId === dept.id ? (
@@ -210,6 +220,13 @@ export default function DepartmentsPage() {
                             ))}
                         </div>
                     )}
+
+                    <Pagination
+                        page={page}
+                        pageSize={pageSize}
+                        total={departments?.length || 0}
+                        onPageChange={setPage}
+                    />
                 </div>
             </div>
         </div>

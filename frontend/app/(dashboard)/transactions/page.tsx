@@ -6,14 +6,19 @@ import { useState, useMemo } from "react";
 import { TransactionModal } from "@/components/TransactionModal";
 import { Button } from "@/components/ui/button";
 import { BackgroundGradients } from "@/components/BackgroundGradients";
-import { ItemSkeleton } from "@/components/ItemSkeleton";
 import { Card, CardContent } from "@/components/ui/card";
+import { Pagination } from "@/components/Pagination";
+import { TableSkeleton } from "@/components/TableSkeleton";
 
 export default function TransactionsPage() {
     const queryClient = useQueryClient();
     const [searchQuery, setSearchQuery] = useState("");
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+    const [page, setPage] = useState(1);
+    const pageSize = 10;
 
     const { data: transactionsRes, isLoading, isFetched } = useQuery({
         queryKey: ["transactions"],
@@ -47,12 +52,40 @@ export default function TransactionsPage() {
     });
 
     const filteredTransactions = useMemo(() => {
-        return transactions.filter((t: Transaction) =>
-            t.vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            t.department.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            t.remarks?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    }, [transactions, searchQuery]);
+        const q = searchQuery.toLowerCase();
+
+        let startDate: Date | null = null;
+        let endExclusive: Date | null = null;
+
+        if (fromDate) {
+            startDate = new Date(fromDate);
+        }
+        if (toDate) {
+            const d = new Date(toDate);
+            endExclusive = new Date(d.getTime() + 24 * 60 * 60 * 1000);
+        }
+
+        return transactions.filter((t: Transaction) => {
+            const createdAt = new Date(t.createdAt);
+
+            if (startDate && createdAt < startDate) return false;
+            if (endExclusive && createdAt >= endExclusive) return false;
+
+            if (!q) return true;
+
+            return (
+                t.vendor.name.toLowerCase().includes(q) ||
+                t.department.name.toLowerCase().includes(q) ||
+                t.remarks?.toLowerCase().includes(q)
+            );
+        });
+    }, [transactions, searchQuery, fromDate, toDate]);
+
+    const paginatedTransactions = useMemo(() => {
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        return filteredTransactions.slice(start, end);
+    }, [filteredTransactions, page, pageSize]);
 
     const handleEdit = (transaction: Transaction) => {
         setSelectedTransaction(transaction);
@@ -98,7 +131,7 @@ export default function TransactionsPage() {
                 </Button>
             </div>
 
-            <div className="flex flex-col gap-4 md:flex-row md:items-center">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div className="relative flex-1">
                     <svg
                         className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -117,14 +150,51 @@ export default function TransactionsPage() {
                         type="text"
                         placeholder="Search by vendor, department or remarks..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setPage(1);
+                        }}
                         className="w-full rounded-2xl border bg-white/60 backdrop-blur-sm px-11 py-3.5 text-sm ring-offset-background transition-all focus:outline-none focus:ring-2 focus:ring-purple-200"
                     />
+                </div>
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
+                            From
+                        </label>
+                        <input
+                            type="date"
+                            value={fromDate}
+                            onChange={(e) => {
+                                setFromDate(e.target.value);
+                                setPage(1);
+                            }}
+                            className="w-full md:w-auto rounded-2xl border bg-white/60 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
+                            To
+                        </label>
+                        <input
+                            type="date"
+                            value={toDate}
+                            onChange={(e) => {
+                                setToDate(e.target.value);
+                                setPage(1);
+                            }}
+                            className="w-full md:w-auto rounded-2xl border bg-white/60 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        />
+                    </div>
                 </div>
             </div>
 
             {isLoading ? (
-                <ItemSkeleton />
+                <div className="w-full overflow-hidden rounded-2xl border bg-white/60 backdrop-blur-md shadow-sm">
+                    <div className="p-4">
+                        <TableSkeleton columns={6} rows={8} />
+                    </div>
+                </div>
             ) : (
                 <div className="w-full overflow-hidden rounded-2xl border bg-white/60 backdrop-blur-md shadow-sm">
                     <div className="overflow-x-auto">
@@ -140,7 +210,7 @@ export default function TransactionsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {filteredTransactions.map((transaction: Transaction) => (
+                                {paginatedTransactions.map((transaction: Transaction) => (
                                     <tr
                                         key={transaction.id}
                                         className="group transition-colors hover:bg-white/80"
@@ -220,6 +290,13 @@ export default function TransactionsPage() {
                     </div>
                 </div>
             )}
+
+            <Pagination
+                page={page}
+                pageSize={pageSize}
+                total={filteredTransactions.length}
+                onPageChange={setPage}
+            />
 
             {isFetched && filteredTransactions.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-20 bg-white/40 rounded-3xl border border-dashed">

@@ -9,12 +9,15 @@ import { BackgroundGradients } from "@/components/BackgroundGradients";
 import { ItemSkeleton } from "@/components/ItemSkeleton";
 import { Item } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
+import { Pagination } from "@/components/Pagination";
 
 export default function ItemsPage() {
     const queryClient = useQueryClient();
     const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+    const [page, setPage] = useState(1);
+    const pageSize = 12;
 
     const { data: items, isLoading, isFetched } = useQuery({
         queryKey: ["items"],
@@ -47,11 +50,18 @@ export default function ItemsPage() {
 
     const filteredItems = useMemo(() => {
         if (!items) return [];
+        const q = searchQuery.toLowerCase();
         return items.filter((i: Item) =>
-            i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            i.description?.toLowerCase().includes(searchQuery.toLowerCase())
+            i.name.toLowerCase().includes(q) ||
+            i.description?.toLowerCase().includes(q)
         );
     }, [items, searchQuery]);
+
+    const paginatedItems = useMemo(() => {
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        return filteredItems.slice(start, end);
+    }, [filteredItems, page, pageSize]);
 
     const handleEdit = (item: Item) => {
         setSelectedItem(item);
@@ -116,7 +126,10 @@ export default function ItemsPage() {
                         type="text"
                         placeholder="Search by name or description..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setPage(1);
+                        }}
                         className="w-full rounded-2xl border bg-white/60 backdrop-blur-sm px-11 py-3.5 text-sm ring-offset-background transition-all focus:outline-none focus:ring-2 focus:ring-purple-200"
                     />
                 </div>
@@ -127,7 +140,7 @@ export default function ItemsPage() {
             ) : (
                 <>
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {filteredItems.map((item) => (
+                        {paginatedItems.map((item) => (
                             <Card
                                 key={item.id}
                                 className="group relative overflow-hidden rounded-2xl border bg-white/80 backdrop-blur-md transition-all hover:shadow-xl hover:shadow-purple-900/5 hover:-translate-y-1"
@@ -197,6 +210,13 @@ export default function ItemsPage() {
                     )}
                 </>
             )}
+
+            <Pagination
+                page={page}
+                pageSize={pageSize}
+                total={filteredItems.length}
+                onPageChange={setPage}
+            />
 
             <ItemModal
                 isOpen={isModalOpen}

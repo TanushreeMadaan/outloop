@@ -9,12 +9,15 @@ import { BackgroundGradients } from "@/components/BackgroundGradients";
 import { ItemSkeleton } from "@/components/ItemSkeleton";
 import { Vendor } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
+import { Pagination } from "@/components/Pagination";
 
 export default function VendorsPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
 
   const { data: vendors, isLoading, isFetched } = useQuery({
     queryKey: ["vendors"],
@@ -47,12 +50,19 @@ export default function VendorsPage() {
 
   const filteredVendors = useMemo(() => {
     if (!vendors) return [];
+    const q = searchQuery.toLowerCase();
     return vendors.filter((v: Vendor) =>
-      v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.gstNumber?.toLowerCase().includes(searchQuery.toLowerCase())
+      v.name.toLowerCase().includes(q) ||
+      v.email?.toLowerCase().includes(q) ||
+      v.gstNumber?.toLowerCase().includes(q)
     );
   }, [vendors, searchQuery]);
+
+  const paginatedVendors = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredVendors.slice(start, end);
+  }, [filteredVendors, page, pageSize]);
 
   const handleEdit = (vendor: Vendor) => {
     setSelectedVendor(vendor);
@@ -117,7 +127,10 @@ export default function VendorsPage() {
             type="text"
             placeholder="Search by name, email or GST..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             className="w-full rounded-2xl border bg-white/60 backdrop-blur-sm px-11 py-3.5 text-sm ring-offset-background transition-all focus:outline-none focus:ring-2 focus:ring-purple-200"
           />
         </div>
@@ -128,7 +141,7 @@ export default function VendorsPage() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredVendors.map((vendor) => (
+            {paginatedVendors.map((vendor) => (
               <Card
                 key={vendor.id}
                 className="group relative overflow-hidden rounded-2xl border bg-white/80 backdrop-blur-md transition-all hover:shadow-xl hover:shadow-purple-900/5 hover:-translate-y-1"
@@ -213,6 +226,13 @@ export default function VendorsPage() {
           )}
         </>
       )}
+
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={filteredVendors.length}
+        onPageChange={setPage}
+      />
 
       <VendorModal
         isOpen={isModalOpen}

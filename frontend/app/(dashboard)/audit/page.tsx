@@ -3,12 +3,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAuditLogs } from "@/lib/api/audit";
 import { BackgroundGradients } from "@/components/BackgroundGradients";
-import { ItemSkeleton } from "@/components/ItemSkeleton";
 import { Calendar, User, Activity, ShieldCheck, ChevronDown, ChevronUp, ArrowRight, Clock, Box, HardDrive, UserCheck } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Pagination } from "@/components/Pagination";
+import { TableSkeleton } from "@/components/TableSkeleton";
 
 export default function AuditLogsPage() {
     const [expandedIds, setExpandedIds] = useState<string[]>([]);
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
+    const [page, setPage] = useState(1);
+    const pageSize = 15;
 
     const { data: logs, isLoading } = useQuery({
         queryKey: ["audit-logs"],
@@ -63,11 +68,41 @@ export default function AuditLogsPage() {
         return changes.length ? changes : null;
     };
 
+    const filteredLogs = useMemo(() => {
+        if (!logs) return [];
+
+        let startDate: Date | null = null;
+        let endExclusive: Date | null = null;
+
+        if (fromDate) {
+            startDate = new Date(fromDate);
+        }
+        if (toDate) {
+            const d = new Date(toDate);
+            endExclusive = new Date(d.getTime() + 24 * 60 * 60 * 1000);
+        }
+
+        return logs.filter((log) => {
+            const createdAt = new Date(log.createdAt);
+
+            if (startDate && createdAt < startDate) return false;
+            if (endExclusive && createdAt >= endExclusive) return false;
+
+            return true;
+        });
+    }, [logs, fromDate, toDate]);
+
+    const paginatedLogs = useMemo(() => {
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        return filteredLogs.slice(start, end);
+    }, [filteredLogs, page, pageSize]);
+
     return (
         <div className="relative min-h-[calc(100vh-100px)] space-y-8 p-4 md:p-8 overflow-hidden font-[family-name:var(--font-geist-sans)]">
             <BackgroundGradients />
 
-            <div className="flex flex-col gap-1 text-left">
+            <div className="flex flex-col gap-3 text-left md:flex-row md:items-end md:justify-between">
                 <div className="flex items-center gap-3">
                     <div className="p-3 bg-white/50 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm">
                         <ShieldCheck className="w-8 h-8 text-purple-600" />
@@ -75,6 +110,36 @@ export default function AuditLogsPage() {
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-gray-900 leading-tight">Audit Logs</h1>
                         <p className="text-sm text-muted-foreground font-medium">A complete history of all activities and changes</p>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
+                            From
+                        </label>
+                        <input
+                            type="date"
+                            value={fromDate}
+                            onChange={(e) => {
+                                setFromDate(e.target.value);
+                                setPage(1);
+                            }}
+                            className="w-full md:w-auto rounded-2xl border bg-white/60 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
+                            To
+                        </label>
+                        <input
+                            type="date"
+                            value={toDate}
+                            onChange={(e) => {
+                                setToDate(e.target.value);
+                                setPage(1);
+                            }}
+                            className="w-full md:w-auto rounded-2xl border bg-white/60 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        />
                     </div>
                 </div>
             </div>
@@ -92,10 +157,12 @@ export default function AuditLogsPage() {
                         <tbody className="divide-y divide-gray-100">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={3} className="p-12"><ItemSkeleton /></td>
+                                    <td colSpan={3} className="p-6">
+                                        <TableSkeleton columns={3} rows={6} />
+                                    </td>
                                 </tr>
                             ) : (
-                                logs?.map((log) => {
+                                paginatedLogs.map((log) => {
                                     const isExpanded = expandedIds.includes(log.id);
                                     return (
                                         <>
@@ -286,6 +353,12 @@ export default function AuditLogsPage() {
                     </table>
                 </div>
             </div>
+            <Pagination
+                page={page}
+                pageSize={pageSize}
+                total={filteredLogs.length}
+                onPageChange={setPage}
+            />
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center mt-4">Audit Access Log • {new Date().getFullYear()}</p>
         </div>
     );
