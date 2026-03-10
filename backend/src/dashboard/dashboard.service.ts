@@ -20,9 +20,9 @@ export class DashboardService {
       this.prisma.transaction.count(),
       this.prisma.transaction.count({ where: { isReturnable: true } }),
       this.prisma.transaction.count({ where: { isReturnable: false } }),
-      this.prisma.vendor.count(),
-      this.prisma.department.count(),
-      this.prisma.item.count(),
+      this.prisma.vendor.count({ where: { deletedAt: null } }),
+      this.prisma.department.count({ where: { deletedAt: null } }),
+      this.prisma.item.count({ where: { deletedAt: null } }),
       this.prisma.transaction.count({ where: { status: 'ACTIVE' } }),
       this.prisma.transaction.count({
         where: {
