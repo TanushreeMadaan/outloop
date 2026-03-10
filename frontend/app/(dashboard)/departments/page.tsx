@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 import { getDepartments, createDepartment, updateDepartment, deleteDepartment } from "@/lib/api/departments";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,10 +33,11 @@ export default function DepartmentsPage() {
             queryClient.invalidateQueries({ queryKey: ["departments"] });
             setNewName("");
             setIsSubmitting(false);
+            toast.success("Department created successfully");
         },
-        onError: () => {
+        onError: (error: any) => {
             setIsSubmitting(false);
-            alert("Failed to create department");
+            toast.error(error.response?.data?.message || "Failed to create department");
         }
     });
 
@@ -44,9 +46,10 @@ export default function DepartmentsPage() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["departments"] });
             setEditingId(null);
+            toast.success("Department updated successfully");
         },
-        onError: () => {
-            alert("Failed to update department");
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || "Failed to update department");
         }
     });
 
@@ -55,9 +58,11 @@ export default function DepartmentsPage() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["departments"] });
             setDeletingId(null);
+            toast.success("Department deleted successfully");
         },
-        onError: () => {
-            alert("Failed to delete department");
+        onError: (error: any) => {
+            setDeletingId(null);
+            toast.error(error.response?.data?.message || "Failed to delete department");
         }
     });
 

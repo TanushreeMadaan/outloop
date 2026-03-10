@@ -43,6 +43,7 @@ model Department {
   id        String   @id @default(uuid())
   name      String   @unique
   createdAt DateTime @default(now())
+  deletedAt DateTime?
   transactions Transaction[]
 }
 

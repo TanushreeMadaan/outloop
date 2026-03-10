@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
@@ -55,7 +55,7 @@ export class VendorService {
   async remove(id: string, userId: string) {
     const oldVendor = await this.prisma.vendor.findUnique({ where: { id } });
     if (!oldVendor) {
-      throw new Error('Vendor not found');
+      throw new NotFoundException('Vendor not found');
     }
 
     const activeTransaction = await this.prisma.transaction.findFirst({
@@ -66,7 +66,7 @@ export class VendorService {
     });
 
     if (activeTransaction) {
-      throw new Error('Cannot delete: This vendor is currently involved in an active transaction.');
+      throw new BadRequestException('Cannot delete: This vendor is currently involved in an active transaction.');
     }
 
     const vendor = await this.prisma.vendor.update({

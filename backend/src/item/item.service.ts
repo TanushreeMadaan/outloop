@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -28,6 +28,7 @@ export class ItemService {
 
   findAll() {
     return this.prisma.item.findMany({
+      where: { deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -71,7 +72,7 @@ export class ItemService {
     });
 
     if (activeTransaction) {
-      throw new Error('Cannot delete: This item is currently involved in an active transaction.');
+      throw new BadRequestException('Cannot delete: This item is currently involved in an active transaction.');
     }
 
     const item = await this.prisma.item.update({

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 import { getItems, createItem, updateItem, deleteItem } from "@/lib/api/items";
 import { useState, useMemo } from "react";
 import { ItemModal } from "@/components/ItemModal";
@@ -28,7 +29,11 @@ export default function ItemsPage() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["items"] });
             setIsModalOpen(false);
+            toast.success("Item created successfully");
         },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || "Failed to create item");
+        }
     });
 
     const updateMutation = useMutation({
@@ -37,14 +42,22 @@ export default function ItemsPage() {
             queryClient.invalidateQueries({ queryKey: ["items"] });
             setIsModalOpen(false);
             setSelectedItem(null);
+            toast.success("Item updated successfully");
         },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || "Failed to update item");
+        }
     });
 
     const deleteMutation = useMutation({
         mutationFn: deleteItem,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["items"] });
+            toast.success("Item deleted successfully");
         },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || "Failed to delete item");
+        }
     });
 
     const filteredItems = useMemo(() => {

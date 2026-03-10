@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 import { getVendors, createVendor, updateVendor, deleteVendor } from "@/lib/api/vendors";
 import { useState, useMemo } from "react";
 import { VendorModal } from "@/components/VendorModal";
@@ -29,7 +30,11 @@ export default function VendorsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendors"] });
       setIsModalOpen(false);
+      toast.success("Vendor created successfully");
     },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to create vendor");
+    }
   });
 
   const updateMutation = useMutation({
@@ -38,14 +43,22 @@ export default function VendorsPage() {
       queryClient.invalidateQueries({ queryKey: ["vendors"] });
       setIsModalOpen(false);
       setSelectedVendor(null);
+      toast.success("Vendor updated successfully");
     },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to update vendor");
+    }
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteVendor,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      toast.success("Vendor deleted successfully");
     },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to delete vendor");
+    }
   });
 
   const filteredVendors = useMemo(() => {

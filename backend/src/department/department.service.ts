@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { AuditService } from '../audit/audit.service';
@@ -29,6 +29,7 @@ export class DepartmentService {
 
   findAll() {
     return this.prisma.department.findMany({
+      where: { deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -54,8 +55,24 @@ export class DepartmentService {
 
   async remove(id: string, userId: string) {
     const oldDepartment = await this.prisma.department.findUnique({ where: { id } });
-    const department = await this.prisma.department.delete({
+    if (!oldDepartment) {
+      throw new NotFoundException('Department not found');
+    }
+
+    const activeTransaction = await this.prisma.transaction.findFirst({
+      where: {
+        departmentId: id,
+        status: 'ACTIVE',
+      },
+    });
+
+    if (activeTransaction) {
+      throw new BadRequestException('Cannot delete: This department is currently involved in an active transaction.');
+    }
+
+    const department = await this.prisma.department.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
 
     await this.auditService.log({
