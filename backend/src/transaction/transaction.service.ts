@@ -19,7 +19,7 @@ export class TransactionService {
   ) { }
 
   async create(data: CreateTransactionDto, userId: string) {
-    const { vendorId, departmentId, itemIds, isReturnable, remarks } = data;
+    const { vendorId, departmentId, itemIds, isReturnable, remarks, expectedReturnDate } = data;
 
     // Validating vendor
     const vendor = await this.prisma.vendor.findUnique({
@@ -52,6 +52,7 @@ export class TransactionService {
           departmentId,
           isReturnable,
           remarks,
+          expectedReturnDate,
           createdById: userId,
         },
       });

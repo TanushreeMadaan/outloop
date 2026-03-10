@@ -163,7 +163,8 @@ export default function TransactionsPage() {
                                     <th className="px-6 py-4">Vendor</th>
                                     <th className="px-6 py-4">Department</th>
                                     <th className="px-6 py-4">Items</th>
-                                    <th className="px-6 py-4">Type</th>
+                                    <th className="px-6 py-4 text-center">Type</th>
+                                    <th className="px-6 py-4">Expected Return</th>
                                     <th className="px-6 py-4">Remarks</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
@@ -206,13 +207,29 @@ export default function TransactionsPage() {
                                                 ))}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5 text-sm">
+                                        <td className="px-6 py-5 text-center">
                                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${transaction.isReturnable
                                                 ? "bg-amber-50 text-amber-600 border border-amber-100"
                                                 : "bg-emerald-50 text-emerald-600 border border-emerald-100"
                                                 }`}>
-                                                {transaction.isReturnable ? "Returnable" : "Non-Returnable"}
+                                                {transaction.isReturnable ? "Returnable" : "Consumable"}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            {transaction.isReturnable && transaction.expectedReturnDate ? (
+                                                <div className="flex flex-col gap-0.5">
+                                                    <span className="text-xs font-semibold text-gray-700">
+                                                        {new Date(transaction.expectedReturnDate).toLocaleDateString(undefined, {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </span>
+                                                    <span className="text-[10px] text-gray-400 font-medium lowercase">expected return</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-300 text-xs">-</span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-5">
                                             <p className="text-xs text-gray-500 line-clamp-1 max-w-[200px]" title={transaction.remarks || ""}>

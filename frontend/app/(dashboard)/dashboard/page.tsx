@@ -83,7 +83,7 @@ export default function DashboardPage() {
           <Card key={i} className="border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
-              <div className={`p-2 rounded bg-blue-50`}>
+                <div className={`p-2 rounded bg-blue-50`}>
                   {stat.icon}
                 </div>
               </div>
@@ -158,12 +158,19 @@ export default function DashboardPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tight ${transaction.isReturnable
-                        ? "bg-amber-50 text-amber-600 border border-amber-100"
-                        : "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                        }`}>
-                        {transaction.isReturnable ? "Returnable" : "Non-Returnable"}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tight ${transaction.isReturnable
+                          ? "bg-amber-50 text-amber-600 border border-amber-100"
+                          : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                          }`}>
+                          {transaction.isReturnable ? "Returnable" : "Consumable"}
+                        </span>
+                        {transaction.isReturnable && transaction.expectedReturnDate && (
+                          <span className="text-[9px] font-medium text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
+                            Due {new Date(transaction.expectedReturnDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

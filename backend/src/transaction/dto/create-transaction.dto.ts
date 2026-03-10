@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsOptional,
   IsString,
+  IsDateString,
   ArrayNotEmpty,
 } from 'class-validator';
 
@@ -24,4 +25,8 @@ export class CreateTransactionDto {
   @IsOptional()
   @IsString()
   remarks?: string;
+
+  @IsOptional()
+  @IsDateString()
+  expectedReturnDate?: string;
 }

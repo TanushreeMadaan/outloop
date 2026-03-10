@@ -11,12 +11,23 @@ import { getDepartments } from "@/lib/api/departments";
 import { getItems } from "@/lib/api/items";
 import { Vendor, Item, Department } from "@/types";
 
+import { format } from "date-fns";
+import { Calendar as CalendarIcon, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+
 const transactionSchema = z.object({
     vendorId: z.string().min(1, "Vendor is required"),
     departmentId: z.string().min(1, "Department is required"),
     itemIds: z.array(z.string()).min(1, "At least one item must be selected"),
     isReturnable: z.boolean(),
     remarks: z.string().optional().or(z.literal("")),
+    expectedReturnDate: z.string().optional().nullable(),
 });
 
 type TransactionFormData = z.infer<typeof transactionSchema>;
@@ -61,11 +72,13 @@ export function TransactionModal({
             itemIds: [],
             isReturnable: false,
             remarks: "",
+            expectedReturnDate: null,
         },
     });
 
     const selectedItemIds = watch("itemIds");
     const isReturnable = watch("isReturnable");
+    const expectedReturnDate = watch("expectedReturnDate");
 
     useEffect(() => {
         if (isOpen) {
@@ -87,6 +100,7 @@ export function TransactionModal({
                 itemIds: initialData.items.map((it) => it.itemId),
                 isReturnable: initialData.isReturnable,
                 remarks: initialData.remarks || "",
+                expectedReturnDate: initialData.expectedReturnDate || null,
             });
         } else {
             reset({
@@ -95,6 +109,7 @@ export function TransactionModal({
                 itemIds: [],
                 isReturnable: false,
                 remarks: "",
+                expectedReturnDate: null,
             });
         }
     }, [initialData, reset, isOpen]);
@@ -253,23 +268,74 @@ export function TransactionModal({
                         {errors.itemIds && <p className="text-xs text-red-500 ml-1 font-medium">{errors.itemIds.message}</p>}
                     </div>
 
-                    <div className="flex items-center justify-between py-4 px-6 rounded-2xl bg-purple-50/50 border border-purple-100/50 transition-all hover:border-purple-200/50 group">
-                        <div className="flex flex-col gap-0.5">
-                            <span className="text-sm font-bold text-gray-900 group-hover:text-purple-900 transition-colors">Returnable Status</span>
-                            <span className="text-[11px] text-gray-500 font-medium">Is this a returnable transaction?</span>
+                    <div className="space-y-3 p-1 rounded-2xl bg-gray-50 border border-gray-100">
+                        <div className="flex p-1 gap-1">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setValue("isReturnable", false);
+                                    setValue("expectedReturnDate", null);
+                                }}
+                                className={cn(
+                                    "flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-200",
+                                    !isReturnable
+                                        ? "bg-white text-emerald-600 shadow-sm border border-gray-100"
+                                        : "text-gray-400 hover:text-gray-600"
+                                )}
+                            >
+                                <span className={cn("text-sm font-bold", !isReturnable ? "text-emerald-700" : "text-gray-500")}>Consumable</span>
+                                <span className="text-[10px] font-medium opacity-70">Single use asset</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setValue("isReturnable", true)}
+                                className={cn(
+                                    "flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-200",
+                                    isReturnable
+                                        ? "bg-white text-amber-600 shadow-sm border border-gray-100"
+                                        : "text-gray-400 hover:text-gray-600"
+                                )}
+                            >
+                                <span className={cn("text-sm font-bold", isReturnable ? "text-amber-700" : "text-gray-500")}>Returnable</span>
+                                <span className="text-[10px] font-medium opacity-70">Should be returned</span>
+                            </button>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => setValue("isReturnable", !isReturnable)}
-                            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 ${isReturnable ? "bg-purple-600 shadow-lg shadow-purple-600/20" : "bg-gray-200"
-                                }`}
-                        >
-                            <span
-                                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-all duration-300 shadow-sm ${isReturnable ? "translate-x-6" : "translate-x-1"
-                                    }`}
-                            />
-                        </button>
                     </div>
+
+                    {isReturnable && (
+                        <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-500 ml-1">Expected Return Date</label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full rounded-2xl border bg-gray-50/50 px-4 py-6.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all justify-start text-left",
+                                            !expectedReturnDate && "text-gray-400"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4 text-purple-600" />
+                                        {expectedReturnDate ? (
+                                            format(new Date(expectedReturnDate), "PPP")
+                                        ) : (
+                                            <span>Pick a date</span>
+                                        )}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0 rounded-3xl overflow-hidden shadow-2xl border-gray-200/50" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={expectedReturnDate ? new Date(expectedReturnDate) : undefined}
+                                        onSelect={(date) => {
+                                            setValue("expectedReturnDate", date ? date.toISOString() : null);
+                                        }}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                            {errors.expectedReturnDate && <p className="text-xs text-red-500 ml-1 font-medium">{errors.expectedReturnDate.message}</p>}
+                        </div>
+                    )}
 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold uppercase tracking-wider text-gray-500 ml-1">Remarks</label>

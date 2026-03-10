@@ -7,6 +7,7 @@ export interface Transaction {
     departmentId: string;
     isReturnable: boolean;
     remarks?: string;
+    expectedReturnDate?: string;
     createdAt: string;
     vendor: Vendor;
     department: Department;
