@@ -2,17 +2,39 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardSummary } from "@/lib/api/dashboard";
+import { getDashboardCharts } from "@/lib/api/reports";
+import { getMe } from "@/lib/api/auth";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ItemSkeleton } from "@/components/ItemSkeleton";
 import Link from "next/link";
 import { Transaction } from "@/types";
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell
+} from "recharts";
+import { TrendingUp, Target } from "lucide-react";
+
+const COLORS = ['#3b82f6', '#ef4444', '#f59e0b'];
 
 export default function DashboardPage() {
-  const { data: summary, isLoading } = useQuery({
+  const { data: user } = useQuery({
+    queryKey: ["me"],
+    queryFn: getMe,
+  });
+
+  const { data: summary, isLoading: isLoadingSummary } = useQuery({
     queryKey: ["dashboard-summary"],
     queryFn: getDashboardSummary,
   });
+
+  const { data: charts, isLoading: isLoadingCharts } = useQuery({
+    queryKey: ["dashboard-charts"],
+    queryFn: getDashboardCharts,
+    enabled: user?.role === 'ADMIN',
+  });
+
+  const isLoading = isLoadingSummary || (user?.role === 'ADMIN' && isLoadingCharts);
 
   if (isLoading) {
     return (
@@ -21,6 +43,12 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  const accuracyData = charts?.accuracy ? [
+    { name: 'On-Time', value: charts.accuracy.onTime },
+    { name: 'Overdue', value: charts.accuracy.overdue },
+    { name: 'Pending', value: charts.accuracy.pending },
+  ] : [];
 
   const stats = [
     {
@@ -111,6 +139,65 @@ export default function DashboardPage() {
           </Card>
         ))}
       </div>
+
+      {user?.role === 'ADMIN' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 rounded-3xl border-gray-100 shadow-sm overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-blue-500" />
+                Transaction Volume (30d)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="h-[240px] pt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={charts?.trends || []}>
+                  <defs>
+                    <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} hide />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '10px' }}
+                  />
+                  <Area type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorTotal)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-3xl border-gray-100 shadow-sm overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <Target className="w-4 h-4 text-purple-500" />
+                Return Accuracy
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="h-[240px] flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={accuracyData}
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {accuracyData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '10px' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Recent Activity */}
       <div className="mt-8">

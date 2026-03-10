@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getMe } from "@/lib/api/auth"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Menu, LogOut, User, LayoutDashboard, Store, Package, Repeat, Activity } from "lucide-react"
+import { Menu, LogOut, User, LayoutDashboard, Store, Package, Repeat, Activity, BarChart3 } from "lucide-react"
 
 export default function AppShell({
   children,
@@ -37,6 +37,7 @@ export default function AppShell({
     { href: "/transactions", label: "Transactions", icon: Repeat },
     { href: "/audit", label: "Audit Logs", icon: Activity, adminOnly: true },
     { href: "/users", label: "Users", icon: User, adminOnly: true },
+    { href: "/reports", label: "Reports", icon: BarChart3, adminOnly: true },
   ]
 
   const filteredNavItems = navItems.filter(item => !item.adminOnly || user?.role === 'ADMIN')
@@ -65,8 +66,8 @@ export default function AppShell({
               key={item.href}
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2 rounded transition ${isActive
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                ? "bg-blue-50 text-blue-600"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />

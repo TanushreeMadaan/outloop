@@ -35,7 +35,7 @@ export class UserController {
             entityId: user.id,
             action: AuditAction.CREATE,
             performedById: req.user.userId,
-            newValue: { email: user.email, role: user.role, departmentId: user.departmentId },
+            newValue: { email: user.email, role: user.role, departmentId: (user as any).departmentId },
         });
 
         return user;

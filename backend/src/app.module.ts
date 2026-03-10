@@ -13,6 +13,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/roles.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     AuthModule,
     UserModule,
     DashboardModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [
@@ -39,4 +41,4 @@ import { DashboardModule } from './dashboard/dashboard.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
