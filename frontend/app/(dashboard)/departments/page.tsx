@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getDepartments, createDepartment, updateDepartment, deleteDepartment } from "@/lib/api/departments";
-import { BackgroundGradients } from "@/components/BackgroundGradients";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -86,15 +86,12 @@ export default function DepartmentsPage() {
     })();
 
     return (
-        <div className="relative min-h-[calc(100vh-100px)] space-y-8 p-4 md:p-8 overflow-hidden font-[family-name:var(--font-geist-sans)]">
-            <BackgroundGradients />
+        <div className="min-h-[calc(100vh-100px)] p-4 md:p-8 bg-white">
 
-            <div className="flex flex-col gap-1 text-left">
-                <div className="flex items-center gap-3">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-gray-900 leading-tight">Departments</h1>
-                        <p className="text-sm text-muted-foreground">Manage organizational units and distribution centers</p>
-                    </div>
+            <div className="mb-6 flex flex-col gap-1">
+                <div>
+                    <h1 className="text-2xl font-semibold text-gray-900">Departments</h1>
+                    <p className="text-sm text-gray-500">Manage organizational units and distribution centers</p>
                 </div>
             </div>
 
@@ -120,9 +117,8 @@ export default function DepartmentsPage() {
                             <Button
                                 type="submit"
                                 disabled={isSubmitting || !newName.trim()}
-                                className="w-full rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold h-12 shadow-sm transition-all"
                             >
-                                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Department"}
+                                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Create"}
                             </Button>
                         </form>
                     </CardContent>

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardSummary } from "@/lib/api/dashboard";
-import { BackgroundGradients } from "@/components/BackgroundGradients";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { ItemSkeleton } from "@/components/ItemSkeleton";
 import Link from "next/link";
@@ -16,8 +16,7 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="relative min-h-[calc(100vh-100px)] p-4 md:p-8">
-        <BackgroundGradients />
+      <div className="min-h-[calc(100vh-100px)] p-4 md:p-8">
         <ItemSkeleton />
       </div>
     );
@@ -71,29 +70,28 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="relative min-h-[calc(100vh-100px)] space-y-8 p-4 md:p-8 overflow-hidden">
-      <BackgroundGradients />
+    <div className="min-h-[calc(100vh-100px)] space-y-6 p-4 md:p-8 bg-white">
 
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 leading-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Real-time overview of your asset operations</p>
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+        <p className="text-sm text-gray-500 mt-1">Real-time overview of your asset operations</p>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, i) => (
-          <Card key={i} className="group overflow-hidden rounded-2xl border bg-white/70 backdrop-blur-md transition-all hover:shadow-xl hover:shadow-purple-900/5">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-2.5 rounded-xl ${stat.color} transition-colors group-hover:bg-white border border-transparent group-hover:border-gray-100 shadow-sm`}>
+          <Card key={i} className="border">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+              <div className={`p-2 rounded bg-blue-50`}>
                   {stat.icon}
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{stat.label}</p>
-                <div className="flex items-baseline gap-2">
-                  <h2 className="text-3xl font-bold text-gray-900">{stat.value}</h2>
-                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-tight">{stat.subLabel}</span>
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase">{stat.label}</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <h2 className="text-2xl font-semibold text-gray-900">{stat.value}</h2>
+                  <span className="text-xs text-gray-500">{stat.subLabel}</span>
                 </div>
               </div>
             </CardContent>
@@ -102,14 +100,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Activity */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900 tracking-tight">Recent Transactions</h2>
+      <div className="mt-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Recent Transactions</h2>
           <Link
             href="/transactions"
-            className="text-sm font-semibold text-purple-700 hover:text-purple-800 transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-purple-50"
+            className="text-sm font-medium text-blue-600 hover:text-blue-700"
           >
-            View More
+            View All
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>

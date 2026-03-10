@@ -8,14 +8,13 @@ import { useQuery } from "@tanstack/react-query"
 import { getMe } from "@/lib/api/auth"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Menu, LogOut, User, ChevronRight, LayoutDashboard, Store, Package, Repeat, Activity } from "lucide-react"
+import { Menu, LogOut, User, LayoutDashboard, Store, Package, Repeat, Activity } from "lucide-react"
 
 export default function AppShell({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -43,115 +42,92 @@ export default function AppShell({
 
   const SidebarContent = ({ isMobile = false }) => (
     <div className="flex flex-col h-full bg-white">
-      <div className={`px-4 flex items-center gap-3 border-b border-gray-100/50 ${collapsed && !isMobile ? "justify-center" : "justify-between"}`}>
+      <div className="px-4 py-4 border-b">
         <div className="flex items-center gap-2">
-          {(!collapsed || isMobile) && (
+          {(!isMobile) && (
             <Image
               src="/logo-w-name.png"
               alt="Logo"
               width={180}
               height={80}
-              className="rounded-lg"
+              className="rounded"
             />
           )}
         </div>
-
-        {!isMobile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`h-8 w-8 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200 ${!collapsed ? "rotate-180" : ""}`}
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        )}
       </div>
 
-      <nav className="flex flex-col gap-1.5 px-3 py-4 flex-1 overflow-y-auto">
+      <nav className="flex flex-col gap-1 px-3 py-4 flex-1 overflow-y-auto">
         {filteredNavItems.map((item) => {
           const isActive = pathname === item.href
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
-                ? "bg-purple-50 text-purple-700 shadow-sm shadow-purple-900/5"
-                : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                } ${collapsed && !isMobile ? "justify-center px-0" : ""}`}
+              className={`flex items-center gap-3 px-3 py-2 rounded transition ${
+                isActive
+                ? "bg-blue-50 text-blue-600"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              }`}
             >
-              <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-purple-600" : "text-gray-400 group-hover:text-gray-600"}`} />
-              {(!collapsed || isMobile) && <span className="text-[13px] font-semibold">{item.label}</span>}
-              {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-purple-600" />}
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-medium">{item.label}</span>
             </Link>
           )
         })}
       </nav>
 
       {/* Profile Section */}
-      <div className={`mt-auto p-3 border-t bg-gray-50/50 ${collapsed && !isMobile ? "items-center" : ""}`}>
+      <div className="p-3 border-t">
         {user && (
-          <div className={`mb-3 flex items-center gap-3 p-2 rounded-xl bg-white border border-gray-100 shadow-sm ${collapsed && !isMobile ? "justify-center px-2" : ""}`}>
-            <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center flex-shrink-0">
+          <div className="mb-3 flex items-center gap-3 p-2 rounded bg-gray-50">
+            <div className="w-8 h-8 rounded bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
               <User className="w-4 h-4" />
             </div>
-            {(!collapsed || isMobile) && (
-              <div className="flex flex-col min-w-0">
-                <span className="text-[11px] font-bold text-gray-900 truncate">{user.email}</span>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded w-fit">
-                  {user.role}
-                </span>
+            {!isMobile && (
+              <div className="flex flex-col min-w-0 text-xs">
+                <span className="font-medium text-gray-900 truncate">{user.email}</span>
+                <span className="text-gray-500">{user.role}</span>
               </div>
             )}
           </div>
         )}
 
-        <div className="flex flex-col gap-1.5">
-          <Button
-            variant="ghost"
-            className={`w-full h-10 rounded-xl justify-start gap-3 text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors ${collapsed && !isMobile ? "justify-center px-0" : "px-3"}`}
-            onClick={handleLogout}
-          >
-            <LogOut className="w-4 h-4 flex-shrink-0" />
-            {(!collapsed || isMobile) && <span className="text-xs font-bold">Logout</span>}
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-red-600 hover:bg-red-50 h-9"
+          onClick={handleLogout}
+        >
+          <LogOut className="w-4 h-4 flex-shrink-0" />
+          <span className="text-sm font-medium">Logout</span>
+        </Button>
       </div>
     </div>
   )
 
   return (
-    <div className="flex min-h-screen bg-gray-50 font-[family-name:var(--font-geist-sans)]">
+    <div className="flex min-h-screen bg-white font-[family-name:var(--font-geist-sans)]">
       {/* Desktop Sidebar */}
-      <aside
-        className={`hidden md:flex flex-col bg-white border-r transition-all duration-300 ${collapsed ? "w-20" : "w-64"
-          } sticky top-0 h-screen overflow-hidden`}
-      >
+      <aside className="hidden md:flex flex-col bg-white border-r w-64 sticky top-0 h-screen overflow-hidden">
         <SidebarContent />
       </aside>
 
       {/* Mobile Top Bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b z-50 px-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white text-[10px] font-bold">
-            OL
-          </div>
-          <span className="font-bold text-lg tracking-tight text-purple-900">outLoop</span>
-        </div>
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b z-50 px-4 flex items-center justify-between">
+        <span className="font-semibold text-gray-900">outLoop</span>
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-gray-100">
+            <Button variant="ghost" size="icon" className="h-9 w-9">
               <Menu className="w-5 h-5 text-gray-600" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-72 border-none">
+          <SheetContent side="left" className="p-0 w-64 border-r">
             <SidebarContent isMobile />
           </SheetContent>
         </Sheet>
       </div>
 
       {/* Main Content */}
-      <main className={`flex-1 min-h-screen ${collapsed ? "md:pl-0" : ""} pt-16 md:pt-0`}>
+      <main className="flex-1 min-h-screen pt-16 md:pt-0">
         {children}
       </main>
     </div>

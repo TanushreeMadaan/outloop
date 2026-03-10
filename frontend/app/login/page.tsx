@@ -37,31 +37,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-gray-50 overflow-hidden">
-      {/* Gradient Glow Behind Card */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[500px] h-[500px] bg-gradient-to-br from-orange-400 via-purple-400 to-blue-500 opacity-70 blur-[80px] square-full" />
-      </div>
-
-      <Card className="relative w-full max-w-md rounded-2xl shadow-xl border bg-white">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <Card className="w-full max-w-md border">
         <CardContent className="p-8">
           <div className="mb-8 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-semibold text-gray-900">
               Welcome back
             </h1>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-gray-500 mt-2">
               Sign in to manage mall assets
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <input
                 type="email"
                 placeholder="Email"
                 {...register("email")}
-                className="w-full rounded-xl border bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 transition"
+                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
@@ -69,14 +65,15 @@ export default function LoginPage() {
                 type="password"
                 placeholder="Password"
                 {...register("password")}
-                className="w-full rounded-xl border bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 transition"
+                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>}
             </div>
 
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-32 rounded-xl bg-purple-800 text-white hover:bg-purple-900 transition mx-auto block"
+              className="w-full"
             >
               {isSubmitting ? "Signing in..." : "Sign in"}
             </Button>

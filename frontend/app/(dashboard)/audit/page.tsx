@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getAuditLogs } from "@/lib/api/audit";
-import { BackgroundGradients } from "@/components/BackgroundGradients";
+
 import { Calendar, User, Activity, ShieldCheck, ChevronDown, ChevronUp, ArrowRight, Clock, Box, HardDrive, UserCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Pagination } from "@/components/Pagination";
@@ -97,7 +97,7 @@ export default function AuditLogsPage() {
 
     return (
         <div className="relative min-h-[calc(100vh-100px)] space-y-8 p-4 md:p-8 overflow-hidden font-[family-name:var(--font-geist-sans)]">
-            <BackgroundGradients />
+
 
             <div className="flex flex-col gap-3 text-left md:flex-row md:items-end md:justify-between">
                 <div className="flex items-center gap-3">

@@ -5,7 +5,6 @@ import { getItems, createItem, updateItem, deleteItem } from "@/lib/api/items";
 import { useState, useMemo } from "react";
 import { ItemModal } from "@/components/ItemModal";
 import { Button } from "@/components/ui/button";
-import { BackgroundGradients } from "@/components/BackgroundGradients";
 import { ItemSkeleton } from "@/components/ItemSkeleton";
 import { Item } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -88,18 +87,13 @@ export default function ItemsPage() {
     };
 
     return (
-        <div className="relative min-h-[calc(100vh-100px)] space-y-8 p-4 md:p-8 overflow-hidden">
-            <BackgroundGradients />
-
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-h-[calc(100vh-100px)] p-4 md:p-8 bg-white">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900 leading-tight">Items</h1>
-                    <p className="text-sm text-muted-foreground mt-1">Manage and track your mall items</p>
+                    <h1 className="text-2xl font-semibold text-gray-900">Items</h1>
+                    <p className="text-sm text-gray-500 mt-1">Manage and track your mall items</p>
                 </div>
-                <Button
-                    onClick={handleAdd}
-                    className="w-full sm:w-auto rounded-xl bg-purple-800 px-6 py-6 text-white hover:bg-purple-900 transition shadow-lg shadow-purple-900/10"
-                >
+                <Button onClick={handleAdd}>
                     <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
@@ -107,53 +101,35 @@ export default function ItemsPage() {
                 </Button>
             </div>
 
-            <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                <div className="relative flex-1">
-                    <svg
-                        className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                    </svg>
-                    <input
-                        type="text"
-                        placeholder="Search by name or description..."
-                        value={searchQuery}
-                        onChange={(e) => {
-                            setSearchQuery(e.target.value);
-                            setPage(1);
-                        }}
-                        className="w-full rounded-2xl border bg-white/60 backdrop-blur-sm px-11 py-3.5 text-sm ring-offset-background transition-all focus:outline-none focus:ring-2 focus:ring-purple-200"
-                    />
-                </div>
+            <div className="mb-6">
+                <input
+                    type="text"
+                    placeholder="Search by name or description..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setPage(1);
+                    }}
+                    className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
             </div>
 
             {isLoading ? (
                 <ItemSkeleton />
             ) : (
                 <>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {paginatedItems.map((item) => (
-                            <Card
-                                key={item.id}
-                                className="group relative overflow-hidden rounded-2xl border bg-white/80 backdrop-blur-md transition-all hover:shadow-xl hover:shadow-purple-900/5 hover:-translate-y-1"
-                            >
-                                <CardContent className="p-6">
-                                    <div className="mb-4 flex items-start justify-between">
-                                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center text-blue-700 font-bold text-xl ring-1 ring-blue-100/50">
+                            <Card key={item.id} className="border">
+                                <CardContent className="p-4">
+                                    <div className="mb-3 flex items-start justify-between">
+                                        <div className="h-10 w-10 rounded bg-blue-50 flex items-center justify-center text-blue-600 font-semibold text-sm">
                                             {item.name.charAt(0).toUpperCase()}
                                         </div>
-                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex gap-1">
                                             <button
                                                 onClick={() => handleEdit(item)}
-                                                className="rounded-lg p-2 text-gray-400 hover:bg-purple-50 hover:text-purple-600 transition"
+                                                className="rounded p-1 text-gray-400 hover:bg-blue-50 hover:text-blue-600"
                                             >
                                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path
@@ -166,7 +142,7 @@ export default function ItemsPage() {
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(item.id)}
-                                                className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 transition"
+                                                className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
                                             >
                                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path
@@ -180,17 +156,12 @@ export default function ItemsPage() {
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                                        <p className="mt-2 text-sm text-gray-500 line-clamp-2 min-h-[2.5rem]">
-                                            {item.description || "No description available"}
-                                        </p>
-                                        <div className="mt-4 flex items-center text-[11px] text-gray-400 uppercase tracking-widest font-medium">
-                                            <svg className="mr-1.5 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            Added {new Date(item.createdAt).toLocaleDateString()}
-                                        </div>
+                                    <h3 className="font-medium text-gray-900 text-sm">{item.name}</h3>
+                                    <p className="mt-1 text-xs text-gray-500 line-clamp-2">
+                                        {item.description || "No description"}
+                                    </p>
+                                    <div className="mt-3 text-xs text-gray-400">
+                                        {new Date(item.createdAt).toLocaleDateString()}
                                     </div>
                                 </CardContent>
                             </Card>

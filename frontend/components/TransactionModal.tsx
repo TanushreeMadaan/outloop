@@ -15,7 +15,7 @@ const transactionSchema = z.object({
     vendorId: z.string().min(1, "Vendor is required"),
     departmentId: z.string().min(1, "Department is required"),
     itemIds: z.array(z.string()).min(1, "At least one item must be selected"),
-    isReturnable: z.boolean().default(false),
+    isReturnable: z.boolean(),
     remarks: z.string().optional().or(z.literal("")),
 });
 
@@ -117,26 +117,26 @@ export function TransactionModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity p-4">
-            <div className="w-full max-w-2xl scale-100 rounded-3xl border bg-white p-8 shadow-2xl transition-all max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="w-full max-w-2xl rounded border bg-white p-6 shadow-lg max-h-[90vh] overflow-y-auto">
                 {error && (
-                    <div className="mb-4 rounded-xl bg-red-50 p-4 text-sm text-red-600 border border-red-100">
+                    <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
                         {error}
                     </div>
                 )}
-                <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-2xl font-semibold tracking-tight text-gray-900">{title}</h2>
+                <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-lg font-semibold">{title}</h2>
                     <button
                         onClick={onClose}
-                        className="rounded-full p-2 hover:bg-gray-100 transition-colors"
+                        className="rounded p-1 hover:bg-gray-100"
                     >
-                        <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold uppercase tracking-wider text-gray-500 ml-1">Vendor</label>
@@ -281,24 +281,22 @@ export function TransactionModal({
                         />
                     </div>
 
-                    <div className="mt-8 flex justify-end gap-3 pt-2">
+                    <div className="mt-6 flex justify-end gap-2">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={onClose}
-                            className="rounded-2xl px-10 py-6 border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all font-semibold"
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="rounded-2xl bg-purple-800 px-10 py-6 text-white hover:bg-purple-900 transition-all flex items-center gap-2 shadow-xl shadow-purple-900/10 active:scale-95 disabled:opacity-50"
                         >
                             {isSubmitting && (
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
                             )}
-                            <span className="font-semibold">{initialData ? "Update Record" : "Record Movement"}</span>
+                            {initialData ? "Update" : "Save"}
                         </Button>
                     </div>
                 </form>

@@ -5,7 +5,7 @@ import { getTransactions, createTransaction, updateTransaction, deleteTransactio
 import { useState, useMemo } from "react";
 import { TransactionModal } from "@/components/TransactionModal";
 import { Button } from "@/components/ui/button";
-import { BackgroundGradients } from "@/components/BackgroundGradients";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/Pagination";
 import { TableSkeleton } from "@/components/TableSkeleton";
@@ -109,18 +109,14 @@ export default function TransactionsPage() {
     };
 
     return (
-        <div className="relative min-h-[calc(100vh-100px)] space-y-8 p-4 md:p-8 overflow-hidden">
-            <BackgroundGradients />
+        <div className="min-h-[calc(100vh-100px)] p-4 md:p-8 bg-white">
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900 leading-tight">Transactions</h1>
-                    <p className="text-sm text-muted-foreground mt-1">Monitor inward and outward item movements</p>
+                    <h1 className="text-2xl font-semibold text-gray-900">Transactions</h1>
+                    <p className="text-sm text-gray-500 mt-1">Monitor inward and outward item movements</p>
                 </div>
-                <Button
-                    onClick={handleAdd}
-                    className="w-full sm:w-auto rounded-xl bg-purple-800 px-6 py-6 text-white hover:bg-purple-900 transition shadow-lg shadow-purple-900/10"
-                >
+                <Button onClick={handleAdd}>
                     <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
@@ -128,45 +124,26 @@ export default function TransactionsPage() {
                 </Button>
             </div>
 
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                <div className="relative flex-1">
-                    <svg
-                        className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                    </svg>
-                    <input
-                        type="text"
-                        placeholder="Search by vendor, department or remarks..."
-                        value={searchQuery}
-                        onChange={(e) => {
-                            setSearchQuery(e.target.value);
+            <div className="mb-6">
+                <input
+                    type="text"
+                    placeholder="Search by vendor, department or remarks..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setPage(1);
+                    }}
+                    className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <div className="mt-3 flex flex-col gap-1 w-full md:w-72">
+                    <label className="text-xs font-medium text-gray-500 uppercase">Date Range</label>
+                    <DateRangePicker
+                        date={dateRange}
+                        setDate={(range) => {
+                            setDateRange(range);
                             setPage(1);
                         }}
-                        className="w-full rounded-2xl border bg-white/60 backdrop-blur-sm px-11 py-3.5 text-sm ring-offset-background transition-all focus:outline-none focus:ring-2 focus:ring-purple-200"
                     />
-                </div>
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-                    <div className="flex flex-col gap-1 w-full md:w-72">
-                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest ml-1">
-                            Date Range
-                        </label>
-                        <DateRangePicker
-                            date={dateRange}
-                            setDate={(range) => {
-                                setDateRange(range);
-                                setPage(1);
-                            }}
-                        />
-                    </div>
                 </div>
             </div>
 
