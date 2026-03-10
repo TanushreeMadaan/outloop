@@ -55,7 +55,11 @@ export function TransactionModal({
     const [departments, setDepartments] = useState<Department[]>([]);
     const [items, setItems] = useState<Item[]>([]);
     const [itemSearch, setItemSearch] = useState("");
+    const [vendorSearch, setVendorSearch] = useState("");
+    const [deptSearch, setDeptSearch] = useState("");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isVendorDropdownOpen, setIsVendorDropdownOpen] = useState(false);
+    const [isDeptDropdownOpen, setIsDeptDropdownOpen] = useState(false);
 
     const {
         register,
@@ -102,6 +106,8 @@ export function TransactionModal({
                 remarks: initialData.remarks || "",
                 expectedReturnDate: initialData.expectedReturnDate || null,
             });
+            setVendorSearch(initialData.vendor?.name || "");
+            setDeptSearch(initialData.department?.name || "");
         } else {
             reset({
                 vendorId: "",
@@ -111,6 +117,8 @@ export function TransactionModal({
                 remarks: "",
                 expectedReturnDate: null,
             });
+            setVendorSearch("");
+            setDeptSearch("");
         }
     }, [initialData, reset, isOpen]);
 
@@ -128,6 +136,14 @@ export function TransactionModal({
     const handleItemRemove = (itemId: string) => {
         setValue("itemIds", selectedItemIds.filter(id => id !== itemId));
     };
+
+    const filteredVendors = vendors.filter(v =>
+        v.name.toLowerCase().includes(vendorSearch.toLowerCase())
+    );
+
+    const filteredDepts = departments.filter(d =>
+        d.name.toLowerCase().includes(deptSearch.toLowerCase())
+    );
 
     if (!isOpen) return null;
 
@@ -156,20 +172,47 @@ export function TransactionModal({
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold uppercase tracking-wider text-gray-500 ml-1">Vendor</label>
                             <div className="relative">
-                                <select
-                                    {...register("vendorId")}
-                                    className="w-full rounded-2xl border bg-gray-50/50 px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all appearance-none"
-                                >
-                                    <option value="">Select Vendor</option>
-                                    {vendors.map((v) => (
-                                        <option key={v.id} value={v.id}>{v.name}</option>
-                                    ))}
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Search vendor..."
+                                        value={vendorSearch}
+                                        onChange={(e) => {
+                                            setVendorSearch(e.target.value);
+                                            setIsVendorDropdownOpen(true);
+                                            if (errors.vendorId) setValue("vendorId", "");
+                                        }}
+                                        onFocus={() => setIsVendorDropdownOpen(true)}
+                                        className="w-full rounded-2xl border bg-gray-50/50 px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all font-medium"
+                                    />
+                                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400">
+                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
                                 </div>
+                                {isVendorDropdownOpen && (vendorSearch || filteredVendors.length > 0) && (
+                                    <div className="absolute z-10 mt-2 w-full max-h-60 overflow-y-auto rounded-2xl border bg-white p-2 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                                        {filteredVendors.length > 0 ? (
+                                            filteredVendors.map(v => (
+                                                <button
+                                                    key={v.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setValue("vendorId", v.id);
+                                                        setVendorSearch(v.name);
+                                                        setIsVendorDropdownOpen(false);
+                                                    }}
+                                                    className="w-full flex items-center px-4 py-3 rounded-xl text-left text-sm font-medium hover:bg-purple-50 hover:text-purple-700 transition-all"
+                                                >
+                                                    {v.name}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="px-4 py-4 text-sm text-gray-400 italic text-center">No vendors found</div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             {errors.vendorId && <p className="text-xs text-red-500 ml-1 font-medium">{errors.vendorId.message}</p>}
                         </div>
@@ -177,20 +220,47 @@ export function TransactionModal({
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold uppercase tracking-wider text-gray-500 ml-1">Department</label>
                             <div className="relative">
-                                <select
-                                    {...register("departmentId")}
-                                    className="w-full rounded-2xl border bg-gray-50/50 px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all appearance-none"
-                                >
-                                    <option value="">Select Department</option>
-                                    {departments.map((d) => (
-                                        <option key={d.id} value={d.id}>{d.name}</option>
-                                    ))}
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Search department..."
+                                        value={deptSearch}
+                                        onChange={(e) => {
+                                            setDeptSearch(e.target.value);
+                                            setIsDeptDropdownOpen(true);
+                                            if (errors.departmentId) setValue("departmentId", "");
+                                        }}
+                                        onFocus={() => setIsDeptDropdownOpen(true)}
+                                        className="w-full rounded-2xl border bg-gray-50/50 px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all font-medium"
+                                    />
+                                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400">
+                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
                                 </div>
+                                {isDeptDropdownOpen && (deptSearch || filteredDepts.length > 0) && (
+                                    <div className="absolute z-10 mt-2 w-full max-h-60 overflow-y-auto rounded-2xl border bg-white p-2 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                                        {filteredDepts.length > 0 ? (
+                                            filteredDepts.map(d => (
+                                                <button
+                                                    key={d.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setValue("departmentId", d.id);
+                                                        setDeptSearch(d.name);
+                                                        setIsDeptDropdownOpen(false);
+                                                    }}
+                                                    className="w-full flex items-center px-4 py-3 rounded-xl text-left text-sm font-medium hover:bg-purple-50 hover:text-purple-700 transition-all"
+                                                >
+                                                    {d.name}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="px-4 py-4 text-sm text-gray-400 italic text-center">No departments found</div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             {errors.departmentId && <p className="text-xs text-red-500 ml-1 font-medium">{errors.departmentId.message}</p>}
                         </div>
