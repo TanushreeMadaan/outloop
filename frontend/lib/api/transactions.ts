@@ -1,18 +1,5 @@
 import api from "../api";
-import { Vendor, Department, Item } from "@/types";
-
-export interface Transaction {
-    id: string;
-    vendorId: string;
-    departmentId: string;
-    isReturnable: boolean;
-    remarks?: string;
-    expectedReturnDate?: string;
-    createdAt: string;
-    vendor: Vendor;
-    department: Department;
-    items: { item: Item; itemId: string }[];
-}
+import { Vendor, Department, Item, Transaction } from "@/types";
 
 export const getTransactions = async (params?: any) => {
     const res = await api.get("/transactions", { params });
@@ -26,6 +13,11 @@ export const createTransaction = async (data: any) => {
 
 export const updateTransaction = async ({ id, ...data }: any) => {
     const res = await api.patch(`/transactions/${id}`, data);
+    return res.data;
+};
+
+export const markAsReturned = async (id: string, actualReturnDate: string) => {
+    const res = await api.patch(`/transactions/${id}/return`, { actualReturnDate });
     return res.data;
 };
 

@@ -51,6 +51,7 @@ export class TransactionService {
           vendorId,
           departmentId,
           isReturnable,
+          status: isReturnable ? 'ACTIVE' : 'COMPLETED',
           remarks,
           expectedReturnDate,
           createdById: userId,
@@ -114,6 +115,34 @@ export class TransactionService {
         where: { id },
         include: { items: true },
       });
+    });
+
+    await this.auditService.log({
+      entityType: EntityType.TRANSACTION,
+      entityId: id,
+      action: AuditAction.UPDATE,
+      oldValue: existing as any,
+      newValue: result as any,
+      performedById: userId,
+    });
+
+    return result;
+  }
+
+  async markAsReturned(id: string, actualReturnDate: Date, userId: string) {
+    const existing = await this.prisma.transaction.findUnique({
+      where: { id },
+    });
+
+    if (!existing) throw new NotFoundException('Transaction not found');
+    if (!existing.isReturnable) throw new BadRequestException('Only returnable transactions can be marked as returned');
+
+    const result = await this.prisma.transaction.update({
+      where: { id },
+      data: {
+        status: 'COMPLETED',
+        actualReturnDate,
+      },
     });
 
     await this.auditService.log({

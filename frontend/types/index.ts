@@ -20,3 +20,20 @@ export interface Department {
     name: string;
     createdAt: string;
 }
+
+export type TransactionStatus = 'ACTIVE' | 'COMPLETED';
+
+export interface Transaction {
+    id: string;
+    vendorId: string;
+    departmentId: string;
+    isReturnable: boolean;
+    remarks?: string;
+    status: TransactionStatus;
+    expectedReturnDate?: string;
+    actualReturnDate?: string;
+    createdAt: string;
+    vendor: Vendor;
+    department: Department;
+    items: { item: Item; itemId: string }[];
+}

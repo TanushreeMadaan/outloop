@@ -13,6 +13,8 @@ export class DashboardService {
       totalVendors,
       totalDepartments,
       totalItems,
+      pendingReturns,
+      overdueReturns,
       recentTransactions,
     ] = await Promise.all([
       this.prisma.transaction.count(),
@@ -21,6 +23,13 @@ export class DashboardService {
       this.prisma.vendor.count(),
       this.prisma.department.count(),
       this.prisma.item.count(),
+      this.prisma.transaction.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.transaction.count({
+        where: {
+          status: 'ACTIVE',
+          expectedReturnDate: { lt: new Date() },
+        },
+      }),
       this.prisma.transaction.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
@@ -41,6 +50,8 @@ export class DashboardService {
       totalVendors,
       totalDepartments,
       totalItems,
+      pendingReturns,
+      overdueReturns,
       recentTransactions,
     };
   }

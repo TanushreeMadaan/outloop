@@ -1,10 +1,13 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getTransactions, createTransaction, updateTransaction, deleteTransaction, Transaction } from "@/lib/api/transactions";
+import { getTransactions, createTransaction, updateTransaction, deleteTransaction, markAsReturned } from "@/lib/api/transactions";
 import { useState, useMemo } from "react";
 import { TransactionModal } from "@/components/TransactionModal";
+import { ReturnModal } from "@/components/ReturnModal";
 import { Button } from "@/components/ui/button";
+import { toast } from "react-hot-toast";
+import { Transaction, Item, Vendor, Department } from "@/types";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/Pagination";
@@ -17,6 +20,7 @@ export default function TransactionsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
     const [page, setPage] = useState(1);
     const pageSize = 10;
@@ -49,6 +53,21 @@ export default function TransactionsPage() {
         mutationFn: deleteTransaction,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["transactions"] });
+            toast.success("Transaction deleted successfully");
+        },
+        onError: (err: any) => {
+            toast.error(err?.response?.data?.message || "Failed to delete transaction");
+        }
+    });
+
+    const returnMutation = useMutation({
+        mutationFn: ({ id, actualReturnDate }: { id: string; actualReturnDate: string }) =>
+            markAsReturned(id, actualReturnDate),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["transactions"] });
+            setIsReturnModalOpen(false);
+            setSelectedTransaction(null);
+            toast.success("Item marked as returned!");
         },
     });
 
@@ -97,6 +116,17 @@ export default function TransactionsPage() {
     const handleDelete = (id: string) => {
         if (confirm("Are you sure you want to delete this transaction record?")) {
             deleteMutation.mutate(id);
+        }
+    };
+
+    const handleReturn = (transaction: Transaction) => {
+        setSelectedTransaction(transaction);
+        setIsReturnModalOpen(true);
+    };
+
+    const handleReturnSubmit = (actualReturnDate: string) => {
+        if (selectedTransaction) {
+            returnMutation.mutate({ id: selectedTransaction.id, actualReturnDate });
         }
     };
 
@@ -164,7 +194,8 @@ export default function TransactionsPage() {
                                     <th className="px-6 py-4">Department</th>
                                     <th className="px-6 py-4">Items</th>
                                     <th className="px-6 py-4 text-center">Type</th>
-                                    <th className="px-6 py-4">Expected Return</th>
+                                    <th className="px-6 py-4 text-center">Status</th>
+                                    <th className="px-6 py-4">Timeline</th>
                                     <th className="px-6 py-4">Remarks</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
@@ -215,21 +246,44 @@ export default function TransactionsPage() {
                                                 {transaction.isReturnable ? "Returnable" : "Consumable"}
                                             </span>
                                         </td>
+                                        <td className="px-6 py-5 text-center">
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${transaction.status === 'COMPLETED'
+                                                ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                                : new Date(transaction.expectedReturnDate!) < new Date() && transaction.status === 'ACTIVE'
+                                                    ? "bg-rose-50 text-rose-600 border border-rose-100 animate-pulse"
+                                                    : "bg-purple-50 text-purple-600 border border-purple-100"
+                                                }`}>
+                                                {transaction.status === 'COMPLETED' ? 'Completed' : (new Date(transaction.expectedReturnDate!) < new Date() ? 'Overdue' : 'Active')}
+                                            </span>
+                                        </td>
                                         <td className="px-6 py-5">
-                                            {transaction.isReturnable && transaction.expectedReturnDate ? (
-                                                <div className="flex flex-col gap-0.5">
-                                                    <span className="text-xs font-semibold text-gray-700">
-                                                        {new Date(transaction.expectedReturnDate).toLocaleDateString(undefined, {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric'
-                                                        })}
-                                                    </span>
-                                                    <span className="text-[10px] text-gray-400 font-medium lowercase">expected return</span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-gray-300 text-xs">-</span>
-                                            )}
+                                            <div className="flex flex-col gap-1.5">
+                                                {transaction.isReturnable && (
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="text-xs font-semibold text-gray-700">
+                                                            {new Date(transaction.expectedReturnDate!).toLocaleDateString(undefined, {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric'
+                                                            })}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400 font-medium">Expected Return</span>
+                                                    </div>
+                                                )}
+                                                {transaction.actualReturnDate && (
+                                                    <div className="flex flex-col gap-0.5 border-t pt-1 border-gray-100">
+                                                        <span className="text-xs font-semibold text-emerald-600">
+                                                            {new Date(transaction.actualReturnDate).toLocaleDateString(undefined, {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric'
+                                                            })}
+                                                        </span>
+                                                        <span className="text-[10px] text-emerald-400 font-medium font-mono lowercase">actual return</span>
+                                                    </div>
+                                                )}
+                                                {!transaction.isReturnable && <span className="text-gray-300 text-xs">-</span>}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-5">
                                             <p className="text-xs text-gray-500 line-clamp-1 max-w-[200px]" title={transaction.remarks || ""}>
@@ -237,7 +291,15 @@ export default function TransactionsPage() {
                                             </p>
                                         </td>
                                         <td className="px-6 py-5 text-right">
-                                            <div className="flex justify-end gap-1">
+                                            <div className="flex justify-end gap-1 items-center">
+                                                {transaction.status === 'ACTIVE' && (
+                                                    <Button
+                                                        onClick={() => handleReturn(transaction)}
+                                                        className="mr-2 h-9 px-4 text-xs font-semibold shadow-sm hover:shadow-md transition-all whitespace-nowrap"
+                                                    >
+                                                        Mark Returned
+                                                    </Button>
+                                                )}
                                                 <button
                                                     onClick={() => handleEdit(transaction)}
                                                     className="rounded-lg p-2 text-gray-400 hover:bg-purple-50 hover:text-purple-600 transition"
@@ -295,6 +357,12 @@ export default function TransactionsPage() {
                     (updateMutation.error as any)?.response?.data?.message ||
                     null
                 }
+            />
+            <ReturnModal
+                isOpen={isReturnModalOpen}
+                onClose={() => setIsReturnModalOpen(false)}
+                onSubmit={handleReturnSubmit}
+                isSubmitting={returnMutation.isPending}
             />
         </div>
     );

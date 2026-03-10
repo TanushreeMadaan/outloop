@@ -34,6 +34,15 @@ export class TransactionController {
     return this.transactionService.update(id, body, req.user.userId);
   }
 
+  @Patch(':id/return')
+  markAsReturned(
+    @Param('id') id: string,
+    @Body('actualReturnDate') actualReturnDate: string,
+    @Req() req: Request & { user: AuthUser },
+  ) {
+    return this.transactionService.markAsReturned(id, new Date(actualReturnDate), req.user.userId);
+  }
+
   @Delete(':id')
   remove(
     @Param('id') id: string,

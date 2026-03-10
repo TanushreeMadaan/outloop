@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAuditLogs } from "@/lib/api/audit";
 
 import { Calendar, User, Activity, ShieldCheck, ChevronDown, ChevronUp, ArrowRight, Clock, Box, HardDrive, UserCheck } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, Fragment } from "react";
 import { Pagination } from "@/components/Pagination";
 import { TableSkeleton } from "@/components/TableSkeleton";
 import { DateRangePicker } from "@/components/DateRangePicker";
@@ -146,7 +146,7 @@ export default function AuditLogsPage() {
                                 paginatedLogs.map((log) => {
                                     const isExpanded = expandedIds.includes(log.id);
                                     return (
-                                        <>
+                                        <Fragment key={log.id}>
                                             <tr
                                                 key={log.id}
                                                 onClick={() => toggleExpand(log.id)}
@@ -326,7 +326,7 @@ export default function AuditLogsPage() {
                                                     </td>
                                                 </tr>
                                             )}
-                                        </>
+                                        </Fragment>
                                     );
                                 })
                             )}

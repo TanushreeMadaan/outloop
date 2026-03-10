@@ -63,8 +63,20 @@ export class ItemService {
       throw new NotFoundException('Item not found');
     }
 
-    const item = await this.prisma.item.delete({
+    const activeTransaction = await this.prisma.transaction.findFirst({
+      where: {
+        items: { some: { itemId: id } },
+        status: 'ACTIVE',
+      },
+    });
+
+    if (activeTransaction) {
+      throw new Error('Cannot delete: This item is currently involved in an active transaction.');
+    }
+
+    const item = await this.prisma.item.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
 
     await this.auditService.log({

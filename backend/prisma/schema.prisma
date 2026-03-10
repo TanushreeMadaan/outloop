@@ -26,6 +26,11 @@ enum EntityType {
   TRANSACTION
 }
 
+enum TransactionStatus {
+  ACTIVE
+  COMPLETED
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -58,6 +63,7 @@ model Item {
   name        String
   description String?
   createdAt   DateTime @default(now())
+  deletedAt   DateTime?
   transactionItems TransactionItem[]
 }
 
@@ -65,10 +71,12 @@ model Transaction {
   id            String   @id @default(uuid())
   isReturnable  Boolean
   remarks       String?
+  status        TransactionStatus @default(COMPLETED)
   vendorId      String
   departmentId  String
   createdById   String
   expectedReturnDate DateTime?
+  actualReturnDate   DateTime?
   createdAt     DateTime @default(now())
 
   vendor        Vendor     @relation(fields: [vendorId], references: [id])

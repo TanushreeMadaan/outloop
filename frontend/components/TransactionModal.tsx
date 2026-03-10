@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Transaction } from "@/lib/api/transactions";
+import { Transaction } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { getVendors } from "@/lib/api/vendors";

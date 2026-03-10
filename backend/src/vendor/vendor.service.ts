@@ -54,6 +54,21 @@ export class VendorService {
 
   async remove(id: string, userId: string) {
     const oldVendor = await this.prisma.vendor.findUnique({ where: { id } });
+    if (!oldVendor) {
+      throw new Error('Vendor not found');
+    }
+
+    const activeTransaction = await this.prisma.transaction.findFirst({
+      where: {
+        vendorId: id,
+        status: 'ACTIVE',
+      },
+    });
+
+    if (activeTransaction) {
+      throw new Error('Cannot delete: This vendor is currently involved in an active transaction.');
+    }
+
     const vendor = await this.prisma.vendor.update({
       where: { id },
       data: { deletedAt: new Date() },

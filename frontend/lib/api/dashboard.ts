@@ -1,5 +1,5 @@
 import api from "../api";
-import { Transaction } from "./transactions";
+import { Transaction } from "@/types";
 
 export interface DashboardSummary {
     totalTransactions: number;
@@ -8,6 +8,8 @@ export interface DashboardSummary {
     totalVendors: number;
     totalDepartments: number;
     totalItems: number;
+    pendingReturns: number;
+    overdueReturns: number;
     recentTransactions: Transaction[];
 }
 

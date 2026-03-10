@@ -6,7 +6,7 @@ import { getDashboardSummary } from "@/lib/api/dashboard";
 import { Card, CardContent } from "@/components/ui/card";
 import { ItemSkeleton } from "@/components/ItemSkeleton";
 import Link from "next/link";
-import { Transaction } from "@/lib/api/transactions";
+import { Transaction } from "@/types";
 
 export default function DashboardPage() {
   const { data: summary, isLoading } = useQuery({
@@ -67,6 +67,17 @@ export default function DashboardPage() {
       ),
       color: "bg-blue-50",
     },
+    {
+      label: "Pending Returns",
+      value: summary?.pendingReturns || 0,
+      subLabel: `${summary?.overdueReturns || 0} Overdue`,
+      icon: (
+        <svg className="h-5 w-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      color: "bg-rose-50",
+    },
   ];
 
   return (
@@ -78,12 +89,12 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map((stat, i) => (
-          <Card key={i} className="border">
+          <Card key={i} className="border hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <div className={`p-2 rounded bg-blue-50`}>
+                <div className={`p-2 rounded ${stat.color}`}>
                   {stat.icon}
                 </div>
               </div>
@@ -91,7 +102,9 @@ export default function DashboardPage() {
                 <p className="text-xs font-medium text-gray-500 uppercase">{stat.label}</p>
                 <div className="flex items-baseline gap-2 mt-1">
                   <h2 className="text-2xl font-semibold text-gray-900">{stat.value}</h2>
-                  <span className="text-xs text-gray-500">{stat.subLabel}</span>
+                  <span className={`text-[10px] font-medium ${stat.label === 'Pending Returns' && (summary?.overdueReturns || 0) > 0 ? 'text-rose-500 animate-pulse' : 'text-gray-500'}`}>
+                    {stat.subLabel}
+                  </span>
                 </div>
               </div>
             </CardContent>
