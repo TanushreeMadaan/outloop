@@ -33,8 +33,8 @@ export default function AppShell({
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/vendors", label: "Vendors", icon: Store },
     { href: "/items", label: "Items", icon: Package },
-    { href: "/transactions", label: "Transactions", icon: Repeat },
     { href: "/departments", label: "Departments", icon: Store, adminOnly: true },
+    { href: "/transactions", label: "Transactions", icon: Repeat },
     { href: "/audit", label: "Audit Logs", icon: Activity, adminOnly: true },
   ]
 
