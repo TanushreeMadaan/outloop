@@ -18,6 +18,7 @@ import { DateRange } from "react-day-picker";
 export default function TransactionsPage() {
     const queryClient = useQueryClient();
     const [searchQuery, setSearchQuery] = useState("");
+    const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "COMPLETED" | "OVERDUE">("ALL");
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
@@ -84,18 +85,26 @@ export default function TransactionsPage() {
         return transactions.filter((t: Transaction) => {
             const createdAt = new Date(t.createdAt);
 
+            // Date filtering
             if (startDate && createdAt < startDate) return false;
             if (endExclusive && createdAt >= endExclusive) return false;
 
-            if (!q) return true;
+            // Status filtering
+            const isOverdue = t.status === 'ACTIVE' && t.expectedReturnDate && new Date(t.expectedReturnDate) < new Date();
 
+            if (statusFilter === "ACTIVE" && t.status !== "ACTIVE") return false;
+            if (statusFilter === "COMPLETED" && t.status !== "COMPLETED") return false;
+            if (statusFilter === "OVERDUE" && !isOverdue) return false;
+
+            // Search filtering
+            if (!q) return true;
             return (
                 t.vendor.name.toLowerCase().includes(q) ||
                 t.department.name.toLowerCase().includes(q) ||
                 t.remarks?.toLowerCase().includes(q)
             );
         });
-    }, [transactions, searchQuery, dateRange]);
+    }, [transactions, searchQuery, dateRange, statusFilter]);
 
     const paginatedTransactions = useMemo(() => {
         const start = (page - 1) * pageSize;
@@ -154,26 +163,48 @@ export default function TransactionsPage() {
                 </Button>
             </div>
 
-            <div className="mb-6">
-                <input
-                    type="text"
-                    placeholder="Search by vendor, department or remarks..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setPage(1);
-                    }}
-                    className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <div className="mt-3 flex flex-col gap-1 w-full md:w-72">
-                    <label className="text-xs font-medium text-gray-500 uppercase">Date Range</label>
-                    <DateRangePicker
-                        date={dateRange}
-                        setDate={(range) => {
-                            setDateRange(range);
-                            setPage(1);
-                        }}
-                    />
+            <div className="mb-6 flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div className="flex-1">
+                        <input
+                            type="text"
+                            placeholder="Search by vendor, department or remarks..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setPage(1);
+                            }}
+                            className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all border-gray-200 bg-gray-50/30"
+                        />
+                    </div>
+                    <div className="flex flex-col gap-1 w-full md:w-72">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Date Range</label>
+                        <DateRangePicker
+                            date={dateRange}
+                            setDate={(range) => {
+                                setDateRange(range);
+                                setPage(1);
+                            }}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2 p-1 bg-gray-50 w-fit rounded-2xl border border-gray-100">
+                    {(["ALL", "ACTIVE", "COMPLETED", "OVERDUE"] as const).map((status) => (
+                        <button
+                            key={status}
+                            onClick={() => {
+                                setStatusFilter(status);
+                                setPage(1);
+                            }}
+                            className={`px-6 py-2 text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all ${statusFilter === status
+                                    ? "bg-white text-purple-700 shadow-sm border border-purple-100"
+                                    : "text-gray-400 hover:text-gray-600"
+                                }`}
+                        >
+                            {status}
+                        </button>
+                    ))}
                 </div>
             </div>
 
