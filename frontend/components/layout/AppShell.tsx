@@ -36,6 +36,7 @@ export default function AppShell({
     { href: "/departments", label: "Departments", icon: Store, adminOnly: true },
     { href: "/transactions", label: "Transactions", icon: Repeat },
     { href: "/audit", label: "Audit Logs", icon: Activity, adminOnly: true },
+    { href: "/users", label: "Users", icon: User, adminOnly: true },
   ]
 
   const filteredNavItems = navItems.filter(item => !item.adminOnly || user?.role === 'ADMIN')
@@ -63,11 +64,10 @@ export default function AppShell({
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded transition ${
-                isActive
-                ? "bg-blue-50 text-blue-600"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
+              className={`flex items-center gap-3 px-3 py-2 rounded transition ${isActive
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
               <span className="text-sm font-medium">{item.label}</span>

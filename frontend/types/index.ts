@@ -37,3 +37,14 @@ export interface Transaction {
     department: Department;
     items: { item: Item; itemId: string }[];
 }
+
+export type Role = 'ADMIN' | 'USER';
+
+export interface User {
+    id: string;
+    email: string;
+    role: Role;
+    departmentId?: string;
+    department?: Department;
+    createdAt: string;
+}
