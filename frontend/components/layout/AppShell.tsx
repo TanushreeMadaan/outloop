@@ -30,8 +30,8 @@ function SidebarContent({
   isMobile?: boolean
 }) {
   return (
-    <div className="flex h-full flex-col bg-sidebar/80 text-sidebar-foreground backdrop-blur-xl">
-      <div className="border-b border-white/60 px-5 py-5">
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+      <div className="border-b border-white/10 px-5 py-5">
         <div className="flex items-center gap-2">
           {!isMobile && (
             <Image
@@ -53,27 +53,27 @@ function SidebarContent({
               key={item.href}
               href={item.href}
               className={`group flex items-center gap-3 rounded-[1rem] px-3.5 py-2.5 transition-all duration-200 ${isActive
-                ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_18px_40px_-28px_rgba(124,136,214,0.9)] hairline-border"
-                : "text-sidebar-foreground/85 hover:bg-white/65 hover:text-foreground"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_18px_40px_-30px_rgba(31,122,140,0.85)]"
+                : "text-sidebar-foreground/78 hover:bg-white/6 hover:text-sidebar-foreground"
                 }`}
             >
-              <item.icon className={`h-5 w-5 flex-shrink-0 transition-colors ${isActive ? "text-sidebar-accent-foreground" : "text-muted-foreground group-hover:text-foreground"}`} />
+              <item.icon className={`h-5 w-5 flex-shrink-0 transition-colors ${isActive ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/70 group-hover:text-sidebar-foreground"}`} />
               <span className="text-sm font-medium tracking-[-0.01em]">{item.label}</span>
             </Link>
           )
         })}
       </nav>
 
-      <div className="border-t border-white/60 p-3">
+      <div className="border-t border-white/10 p-3">
         {user && (
-          <div className="mb-3 flex items-center gap-3 rounded-[1.15rem] border border-white/65 bg-white/70 p-3 backdrop-blur-sm">
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(190,220,255,0.9),rgba(220,229,255,0.75))] text-[rgb(96,111,176)]">
+          <div className="mb-3 flex items-center gap-3 rounded-[1.15rem] border border-white/10 bg-white/5 p-3">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-sidebar-accent/20 text-sidebar-accent-foreground">
               <User className="w-4 h-4" />
             </div>
             {!isMobile && (
               <div className="flex min-w-0 flex-col text-xs">
-                <span className="truncate font-medium text-foreground">{user.email}</span>
-                <span className="text-muted-foreground">{user.role}</span>
+                <span className="truncate font-medium text-sidebar-foreground">{user.email}</span>
+                <span className="text-sidebar-foreground/55">{user.role}</span>
               </div>
             )}
           </div>
@@ -81,7 +81,7 @@ function SidebarContent({
 
         <Button
           variant="ghost"
-          className="h-10 w-full justify-start gap-3 rounded-[1rem] text-[rgb(181,106,114)] hover:bg-[rgba(238,208,211,0.45)] hover:text-[rgb(154,82,91)]"
+          className="h-10 w-full justify-start gap-3 rounded-[1rem] text-sidebar-foreground/72 hover:bg-white/6 hover:text-sidebar-foreground"
           onClick={handleLogout}
         >
           <LogOut className="w-4 h-4 flex-shrink-0" />
@@ -126,25 +126,19 @@ export default function AppShell({
 
   return (
     <div className="relative flex min-h-screen bg-transparent font-[family-name:var(--font-geist-sans)] text-foreground">
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(190,220,255,0.8),transparent_68%)] blur-3xl" />
-        <div className="absolute right-[-5rem] top-16 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(255,218,204,0.72),transparent_68%)] blur-3xl" />
-        <div className="absolute bottom-[-5rem] left-[20%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(222,239,229,0.58),transparent_68%)] blur-3xl" />
-      </div>
-
-      <aside className="app-shell-surface hairline-border sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-hidden border-r border-white/65 md:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-hidden border-r border-white/10 bg-sidebar md:flex">
         <SidebarContent filteredNavItems={filteredNavItems} pathname={pathname} user={user} handleLogout={handleLogout} />
       </aside>
 
-      <div className="app-shell-surface hairline-border fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-white/65 px-4 md:hidden">
-        <span className="text-sm font-semibold tracking-[-0.02em] text-foreground">outLoop</span>
+      <div className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-white/10 bg-sidebar px-4 md:hidden">
+        <span className="text-sm font-semibold tracking-[-0.02em] text-sidebar-foreground">outLoop</span>
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="h-10 w-10 rounded-full border-white/70 bg-white/75">
-              <Menu className="h-5 w-5 text-muted-foreground" />
+            <Button variant="outline" size="icon" className="h-10 w-10 rounded-full border-white/10 bg-white/5 text-sidebar-foreground hover:bg-white/10 hover:text-sidebar-foreground">
+              <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 border-r border-white/65 p-0">
+          <SheetContent side="left" className="w-64 border-r border-white/10 bg-sidebar p-0">
             <SidebarContent filteredNavItems={filteredNavItems} pathname={pathname} user={user} handleLogout={handleLogout} isMobile />
           </SheetContent>
         </Sheet>

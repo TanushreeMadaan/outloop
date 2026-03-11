@@ -11,8 +11,6 @@ import { Item } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/Pagination";
 
-const gradientClasses = ["gradient-flow-sky", "gradient-flow-lilac", "gradient-flow-amber", "gradient-flow-mint"];
-
 export default function ItemsPage() {
     const queryClient = useQueryClient();
     const [searchQuery, setSearchQuery] = useState("");
@@ -134,17 +132,17 @@ export default function ItemsPage() {
             ) : (
                 <>
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {paginatedItems.map((item, index) => (
-                            <Card key={item.id} className={`soft-gradient-card ${gradientClasses[index % gradientClasses.length]} overflow-hidden`}>
+                        {paginatedItems.map((item) => (
+                            <Card key={item.id} className="overflow-hidden">
                                 <CardContent className="p-4">
                                     <div className="mb-3 flex items-start justify-between">
-                                        <div className="soft-icon-chip h-10 w-10 text-sm font-semibold text-[rgb(104,114,176)]">
+                                        <div className="soft-icon-chip h-10 w-10 bg-secondary text-sm font-semibold text-foreground">
                                             {item.name.charAt(0).toUpperCase()}
                                         </div>
                                         <div className="flex gap-1">
                                             <button
                                                 onClick={() => handleEdit(item)}
-                                                className="rounded-full p-1.5 text-muted-foreground transition hover:bg-[rgba(217,223,248,0.7)] hover:text-[rgb(104,114,176)]"
+                                                className="rounded-full p-1.5 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                                             >
                                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path
@@ -157,7 +155,7 @@ export default function ItemsPage() {
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(item.id)}
-                                                className="rounded-full p-1.5 text-muted-foreground transition hover:bg-[rgba(246,221,223,0.72)] hover:text-[rgb(170,97,112)]"
+                                                className="rounded-full p-1.5 text-muted-foreground transition hover:bg-primary/12 hover:text-primary"
                                             >
                                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path

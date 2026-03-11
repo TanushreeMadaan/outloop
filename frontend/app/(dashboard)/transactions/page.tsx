@@ -12,6 +12,33 @@ import { Pagination } from "@/components/Pagination";
 import { TableSkeleton } from "@/components/TableSkeleton";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import { DateRange } from "react-day-picker";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+function formatDate(date?: string) {
+    if (!date) return "-";
+    return new Date(date).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+}
+
+function isTransactionOverdue(transaction: Transaction) {
+    return transaction.status === "ACTIVE" && transaction.expectedReturnDate && new Date(transaction.expectedReturnDate) < new Date();
+}
+
+function statusLabel(transaction: Transaction) {
+    if (transaction.status === "COMPLETED") return "Completed";
+    return isTransactionOverdue(transaction) ? "Overdue" : "Active";
+}
+
+function itemSummary(items: Transaction["items"]) {
+    if (items.length === 0) return { primary: "No items", remaining: 0 };
+    return {
+        primary: items[0].item.name,
+        remaining: Math.max(0, items.length - 1),
+    };
+}
 
 export default function TransactionsPage() {
     const queryClient = useQueryClient();
@@ -21,6 +48,7 @@ export default function TransactionsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+    const [detailsTransaction, setDetailsTransaction] = useState<Transaction | null>(null);
     const [page, setPage] = useState(1);
     const pageSize = 10;
 
@@ -116,6 +144,10 @@ export default function TransactionsPage() {
         setIsReturnModalOpen(true);
     };
 
+    const handleViewDetails = (transaction: Transaction) => {
+        setDetailsTransaction(transaction);
+    };
+
     const handleReturnSubmit = (actualReturnDate: string) => {
         if (selectedTransaction) {
             returnMutation.mutate({ id: selectedTransaction.id, actualReturnDate });
@@ -209,13 +241,11 @@ export default function TransactionsPage() {
                             <thead>
                                 <tr className="table-head">
                                     <th className="px-6 py-4">ID & Date</th>
-                                    <th className="px-6 py-4">Vendor</th>
                                     <th className="px-6 py-4">Department</th>
                                     <th className="px-6 py-4">Items</th>
                                     <th className="px-6 py-4 text-center">Type</th>
                                     <th className="px-6 py-4 text-center">Status</th>
                                     <th className="px-6 py-4">Timeline</th>
-                                    <th className="px-6 py-4">Remarks</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -240,39 +270,40 @@ export default function TransactionsPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className="text-sm font-semibold text-foreground">{transaction.vendor.name}</span>
+                                            <span className="text-sm font-medium text-primary">{transaction.department.name}</span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className="text-sm font-medium text-[rgb(115,124,178)]">{transaction.department.name}</span>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex flex-wrap gap-1.5 max-w-[240px]">
-                                                {transaction.items.map((it: any) => (
-                                                    <span
-                                                        key={it.item.id}
-                                                        className="rounded-full border border-white/75 bg-[rgba(246,244,249,0.88)] px-2.5 py-0.5 text-[10px] font-semibold text-muted-foreground"
+                                            <div className="flex max-w-[220px] flex-wrap items-center gap-2">
+                                                <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-[10px] font-semibold text-foreground/72">
+                                                    {itemSummary(transaction.items).primary}
+                                                </span>
+                                                {itemSummary(transaction.items).remaining > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleViewDetails(transaction)}
+                                                        className="rounded-full border border-border bg-card px-2.5 py-0.5 text-[10px] font-semibold text-foreground/72 transition hover:bg-muted"
                                                     >
-                                                        {it.item.name}
-                                                    </span>
-                                                ))}
+                                                        +{itemSummary(transaction.items).remaining} items
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-5 text-center">
                                             <span className={`status-pill ${transaction.isReturnable
-                                                ? "bg-[linear-gradient(135deg,rgba(249,229,191,0.96),rgba(244,214,167,0.92))] text-[rgb(165,119,67)]"
-                                                : "bg-[linear-gradient(135deg,rgba(218,239,225,0.96),rgba(192,227,205,0.92))] text-[rgb(77,127,100)]"
+                                                ? "bg-secondary text-foreground"
+                                                : "bg-muted text-foreground"
                                                 }`}>
                                                 {transaction.isReturnable ? "Returnable" : "Consumable"}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5 text-center">
                                             <span className={`status-pill ${transaction.status === 'COMPLETED'
-                                                ? "bg-[linear-gradient(135deg,rgba(218,239,225,0.96),rgba(192,227,205,0.92))] text-[rgb(77,127,100)]"
-                                                : new Date(transaction.expectedReturnDate!) < new Date() && transaction.status === 'ACTIVE'
-                                                    ? "animate-pulse bg-[linear-gradient(135deg,rgba(248,220,225,0.98),rgba(240,196,205,0.94))] text-[rgb(163,87,104)]"
-                                                    : "bg-[linear-gradient(135deg,rgba(214,221,249,0.98),rgba(193,204,243,0.92))] text-[rgb(96,107,164)]"
+                                                ? "bg-secondary text-foreground"
+                                                : isTransactionOverdue(transaction)
+                                                    ? "animate-pulse bg-primary text-white"
+                                                    : "bg-[#E1E5F2] text-foreground"
                                                 }`}>
-                                                {transaction.status === 'COMPLETED' ? 'Completed' : (new Date(transaction.expectedReturnDate!) < new Date() ? 'Overdue' : 'Active')}
+                                                {statusLabel(transaction)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5">
@@ -291,26 +322,29 @@ export default function TransactionsPage() {
                                                 )}
                                                 {transaction.actualReturnDate && (
                                                     <div className="flex flex-col gap-0.5 border-t border-border/60 pt-1">
-                                                        <span className="text-xs font-semibold text-[rgb(86,140,112)]">
+                                                        <span className="text-xs font-semibold text-primary">
                                                             {new Date(transaction.actualReturnDate).toLocaleDateString(undefined, {
                                                                 month: 'short',
                                                                 day: 'numeric',
                                                                 year: 'numeric'
                                                             })}
                                                         </span>
-                                                        <span className="text-[10px] font-mono font-medium lowercase text-[rgb(116,164,134)]">actual return</span>
+                                                        <span className="text-[10px] font-mono font-medium lowercase text-primary">actual return</span>
                                                     </div>
                                                 )}
                                                 {!transaction.isReturnable && <span className="text-xs text-muted-foreground/60">-</span>}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5">
-                                            <p className="line-clamp-1 max-w-[200px] text-xs text-muted-foreground" title={transaction.remarks || ""}>
-                                                {transaction.remarks || "-"}
-                                            </p>
-                                        </td>
                                         <td className="px-6 py-5 text-right">
-                                            <div className="flex justify-end gap-1 items-center">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    onClick={() => handleViewDetails(transaction)}
+                                                    className="h-9 px-3 text-xs font-semibold"
+                                                >
+                                                    View Details
+                                                </Button>
                                                 {transaction.status === 'ACTIVE' && (
                                                     <Button
                                                         onClick={() => handleReturn(transaction)}
@@ -320,8 +354,9 @@ export default function TransactionsPage() {
                                                     </Button>
                                                 )}
                                                 <button
+                                                    type="button"
                                                     onClick={() => handleEdit(transaction)}
-                                                    className="rounded-full p-2 text-muted-foreground transition hover:bg-[rgba(217,223,248,0.7)] hover:text-[rgb(104,114,176)]"
+                                                    className="rounded-full p-2 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                                                 >
                                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -375,6 +410,93 @@ export default function TransactionsPage() {
                 onSubmit={handleReturnSubmit}
                 isSubmitting={returnMutation.isPending}
             />
+            <Dialog open={Boolean(detailsTransaction)} onOpenChange={(open) => !open && setDetailsTransaction(null)}>
+                <DialogContent className="sm:max-w-[680px]">
+                    {detailsTransaction && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>Transaction Details</DialogTitle>
+                                <DialogDescription>
+                                    Full transaction context for {detailsTransaction.department.name}
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-6 py-2 md:grid-cols-2">
+                                <div className="space-y-4">
+                                    <div>
+                                        <p className="control-label ml-0">Transaction ID</p>
+                                        <p className="mt-1 font-mono text-sm text-foreground/80">{detailsTransaction.id}</p>
+                                    </div>
+                                    <div>
+                                        <p className="control-label ml-0">Created</p>
+                                        <p className="mt-1 text-sm font-medium text-foreground">{formatDate(detailsTransaction.createdAt)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="control-label ml-0">Vendor</p>
+                                        <p className="mt-1 text-sm font-medium text-foreground">{detailsTransaction.vendor.name}</p>
+                                    </div>
+                                    <div>
+                                        <p className="control-label ml-0">Department</p>
+                                        <p className="mt-1 text-sm font-medium text-foreground">{detailsTransaction.department.name}</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <p className="control-label ml-0">Type</p>
+                                        <div className="mt-2">
+                                            <span className={`status-pill ${detailsTransaction.isReturnable
+                                                ? "bg-secondary text-foreground"
+                                                : "bg-muted text-foreground"
+                                                }`}>
+                                                {detailsTransaction.isReturnable ? "Returnable" : "Consumable"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="control-label ml-0">Status</p>
+                                        <div className="mt-2">
+                                            <span className={`status-pill ${detailsTransaction.status === 'COMPLETED'
+                                                ? "bg-secondary text-foreground"
+                                                : isTransactionOverdue(detailsTransaction)
+                                                    ? "bg-primary text-white"
+                                                    : "bg-[#E1E5F2] text-foreground"
+                                                }`}>
+                                                {statusLabel(detailsTransaction)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="control-label ml-0">Expected Return</p>
+                                        <p className="mt-1 text-sm font-medium text-foreground">{formatDate(detailsTransaction.expectedReturnDate)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="control-label ml-0">Actual Return</p>
+                                        <p className="mt-1 text-sm font-medium text-foreground">{formatDate(detailsTransaction.actualReturnDate)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-3 border-t border-border/60 pt-5">
+                                <p className="control-label ml-0">Items</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {detailsTransaction.items.map((entry) => (
+                                        <span
+                                            key={entry.item.id}
+                                            className="rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold text-foreground/72"
+                                        >
+                                            {entry.item.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="space-y-2 border-t border-border/60 pt-5">
+                                <p className="control-label ml-0">Remarks</p>
+                                <p className="text-sm leading-6 text-muted-foreground">
+                                    {detailsTransaction.remarks || "No remarks added."}
+                                </p>
+                            </div>
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

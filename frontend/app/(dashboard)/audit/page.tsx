@@ -23,10 +23,10 @@ export default function AuditLogsPage() {
 
     const getActionColor = (action: string) => {
         switch (action.toUpperCase()) {
-            case "CREATE": return "bg-[rgba(222,238,228,0.86)] text-[rgb(86,140,112)] border-white/70";
-            case "UPDATE": return "bg-[rgba(248,232,207,0.86)] text-[rgb(176,131,82)] border-white/70";
-            case "DELETE": return "bg-[rgba(246,221,223,0.88)] text-[rgb(170,97,112)] border-white/70";
-            default: return "bg-[rgba(246,244,249,0.88)] text-muted-foreground border-white/70";
+            case "CREATE": return "bg-secondary text-foreground border-border";
+            case "UPDATE": return "bg-muted text-foreground border-border";
+            case "DELETE": return "bg-primary text-white border-primary";
+            default: return "bg-muted text-muted-foreground border-border";
         }
     };
 
@@ -101,8 +101,8 @@ export default function AuditLogsPage() {
 
             <div className="flex flex-col gap-3 text-left md:flex-row md:items-end md:justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="soft-icon-chip h-14 w-14">
-                        <ShieldCheck className="w-7 h-7 text-[rgb(104,114,176)]" />
+                    <div className="soft-icon-chip h-14 w-14 bg-secondary">
+                        <ShieldCheck className="w-7 h-7 text-foreground" />
                     </div>
                     <div>
                         <h1 className="page-title leading-tight">Audit Logs</h1>
@@ -150,7 +150,7 @@ export default function AuditLogsPage() {
                                             <tr
                                                 key={log.id}
                                                 onClick={() => toggleExpand(log.id)}
-                                                className={`group cursor-pointer transition-all duration-300 hover:bg-white/72 ${isExpanded ? 'relative z-10 bg-white/90 shadow-[0_24px_48px_-40px_rgba(118,112,156,0.55)]' : ''}`}
+                                                className={`group cursor-pointer transition-all duration-300 hover:bg-secondary/20 ${isExpanded ? 'relative z-10 bg-card shadow-[0_18px_36px_-24px_rgba(2,43,58,0.16)]' : ''}`}
                                             >
                                                 <td className="px-8 py-5">
                                                     <div className="flex items-center gap-4">
@@ -169,7 +169,7 @@ export default function AuditLogsPage() {
                                                 </td>
                                                 <td className="px-6 py-5">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="soft-icon-chip h-8 w-8 text-muted-foreground transition-colors group-hover:text-[rgb(104,114,176)]">
+                                                        <div className="soft-icon-chip h-8 w-8 bg-secondary text-muted-foreground transition-colors group-hover:text-foreground">
                                                             <UserCheck className="w-4 h-4" />
                                                         </div>
                                                         <div className="flex flex-col">
@@ -195,28 +195,28 @@ export default function AuditLogsPage() {
                                                                 })}
                                                             </span>
                                                         </div>
-                                                        <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-[rgb(104,114,176)]' : 'text-muted-foreground/50'}`}>
+                                                        <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : 'text-muted-foreground/50'}`}>
                                                             <ChevronDown className="w-5 h-5 ml-2" />
                                                         </div>
                                                     </div>
                                                 </td>
                                             </tr>
                                             {isExpanded && (
-                                                <tr key={`${log.id}-details`} className="bg-white/45">
+                                                <tr key={`${log.id}-details`} className="bg-card">
                                                     <td colSpan={3} className="border-b border-border/60 px-8 py-8">
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-top-4 duration-500">
                                                             <div className="space-y-4">
-                                                                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 ml-1">
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                                                                <h4 className="ml-1 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                                                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                                                                     Previous State
                                                                 </h4>
-                                                                <div className="p-6 rounded-3xl bg-red-50/30 border border-red-100/50 backdrop-blur-sm">
+                                                                <div className="rounded-3xl border border-border bg-muted/50 p-6">
                                                                     {log.action === "UPDATE" && log.oldValue && log.newValue ? (
                                                                         (() => {
                                                                             const delta = getDelta(log.oldValue, log.newValue);
                                                                             if (!delta) {
                                                                                 return (
-                                                                                    <div className="text-[11px] text-red-300 italic">
+                                                                                    <div className="text-[11px] italic text-muted-foreground">
                                                                                         No field-level changes detected
                                                                                     </div>
                                                                                 );
@@ -226,12 +226,12 @@ export default function AuditLogsPage() {
                                                                                     {delta.map(({ key, before }) => (
                                                                                         <div
                                                                                             key={key}
-                                                                                            className="flex flex-col gap-1 border-b border-red-100/20 pb-2 last:border-0 last:pb-0"
+                                                                                            className="flex flex-col gap-1 border-b border-border/50 pb-2 last:border-0 last:pb-0"
                                                                                         >
-                                                                                            <span className="text-[9px] font-bold text-red-400 uppercase tracking-tight">
+                                                                                            <span className="text-[9px] font-bold uppercase tracking-tight text-muted-foreground">
                                                                                                 {key}
                                                                                             </span>
-                                                                                            <span className="text-[11px] font-bold text-red-900 break-all">
+                                                                                            <span className="text-[11px] font-bold break-all text-foreground">
                                                                                                 {renderValue(before)}
                                                                                             </span>
                                                                                         </div>
@@ -244,12 +244,12 @@ export default function AuditLogsPage() {
                                                                             {Object.entries(log.oldValue as object).map(([key, val]) => (
                                                                                 <div
                                                                                     key={key}
-                                                                                    className="flex flex-col gap-1 border-b border-red-100/20 pb-2 last:border-0 last:pb-0"
+                                                                                    className="flex flex-col gap-1 border-b border-border/50 pb-2 last:border-0 last:pb-0"
                                                                                 >
-                                                                                    <span className="text-[9px] font-bold text-red-400 uppercase tracking-tight">
+                                                                                    <span className="text-[9px] font-bold uppercase tracking-tight text-muted-foreground">
                                                                                         {key}
                                                                                     </span>
-                                                                                    <span className="text-[11px] font-bold text-red-900 break-all">
+                                                                                    <span className="text-[11px] font-bold break-all text-foreground">
                                                                                         {renderValue(val)}
                                                                                     </span>
                                                                                 </div>
@@ -257,25 +257,25 @@ export default function AuditLogsPage() {
                                                                         </div>
                                                                     ) : (
                                                                         <div className="flex flex-col items-center justify-center py-6 text-center space-y-2">
-                                                                            <ShieldCheck className="w-6 h-6 text-red-200" />
-                                                                            <span className="text-[11px] font-bold text-red-300 uppercase italic">Entry Created</span>
+                                                                            <ShieldCheck className="w-6 h-6 text-primary/35" />
+                                                                            <span className="text-[11px] font-bold uppercase italic text-muted-foreground">Entry Created</span>
                                                                         </div>
                                                                     )}
                                                                 </div>
                                                             </div>
 
                                                             <div className="space-y-4">
-                                                                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 ml-1">
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                                                <h4 className="ml-1 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                                                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                                                                     Current State
                                                                 </h4>
-                                                                <div className="p-6 rounded-3xl bg-emerald-50/30 border border-emerald-100/50 backdrop-blur-sm">
+                                                                <div className="rounded-3xl border border-border bg-secondary/28 p-6">
                                                                     {log.action === "UPDATE" && log.oldValue && log.newValue ? (
                                                                         (() => {
                                                                             const delta = getDelta(log.oldValue, log.newValue);
                                                                             if (!delta) {
                                                                                 return (
-                                                                                    <div className="text-[11px] text-emerald-300 italic">
+                                                                                    <div className="text-[11px] italic text-muted-foreground">
                                                                                         No field-level changes detected
                                                                                     </div>
                                                                                 );
@@ -285,12 +285,12 @@ export default function AuditLogsPage() {
                                                                                     {delta.map(({ key, after }) => (
                                                                                         <div
                                                                                             key={key}
-                                                                                            className="flex flex-col gap-1 border-b border-emerald-100/20 pb-2 last:border-0 last:pb-0"
+                                                                                            className="flex flex-col gap-1 border-b border-border/50 pb-2 last:border-0 last:pb-0"
                                                                                         >
-                                                                                            <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-tight">
+                                                                                            <span className="text-[9px] font-bold uppercase tracking-tight text-muted-foreground">
                                                                                                 {key}
                                                                                             </span>
-                                                                                            <span className="text-[11px] font-bold text-emerald-900 break-all">
+                                                                                            <span className="text-[11px] font-bold break-all text-foreground">
                                                                                                 {renderValue(after)}
                                                                                             </span>
                                                                                         </div>
@@ -303,12 +303,12 @@ export default function AuditLogsPage() {
                                                                             {Object.entries(log.newValue as object).map(([key, val]) => (
                                                                                 <div
                                                                                     key={key}
-                                                                                    className="flex flex-col gap-1 border-b border-emerald-100/20 pb-2 last:border-0 last:pb-0"
+                                                                                    className="flex flex-col gap-1 border-b border-border/50 pb-2 last:border-0 last:pb-0"
                                                                                 >
-                                                                                    <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-tight">
+                                                                                    <span className="text-[9px] font-bold uppercase tracking-tight text-muted-foreground">
                                                                                         {key}
                                                                                     </span>
-                                                                                    <span className="text-[11px] font-bold text-emerald-900 break-all">
+                                                                                    <span className="text-[11px] font-bold break-all text-foreground">
                                                                                         {renderValue(val)}
                                                                                     </span>
                                                                                 </div>
@@ -316,8 +316,8 @@ export default function AuditLogsPage() {
                                                                         </div>
                                                                     ) : (
                                                                         <div className="flex flex-col items-center justify-center py-6 text-center space-y-2">
-                                                                            <Clock className="w-6 h-6 text-emerald-200" />
-                                                                            <span className="text-[11px] font-bold text-emerald-300 uppercase italic">Entry Deleted</span>
+                                                                            <Clock className="w-6 h-6 text-primary/35" />
+                                                                            <span className="text-[11px] font-bold uppercase italic text-muted-foreground">Entry Deleted</span>
                                                                         </div>
                                                                     )}
                                                                 </div>

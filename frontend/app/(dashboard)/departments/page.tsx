@@ -12,8 +12,6 @@ import { ItemSkeleton } from "@/components/ItemSkeleton";
 import { Department } from "@/types";
 import { Pagination } from "@/components/Pagination";
 
-const gradientClasses = ["gradient-flow-lilac", "gradient-flow-sky", "gradient-flow-mint", "gradient-flow-rose"];
-
 export default function DepartmentsPage() {
     const queryClient = useQueryClient();
     const [newName, setNewName] = useState("");
@@ -147,8 +145,8 @@ export default function DepartmentsPage() {
                         <ItemSkeleton />
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                            {paginatedDepartments.map((dept, index) => (
-                                <Card key={dept.id} className={`group soft-gradient-card ${gradientClasses[index % gradientClasses.length]} relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5`}>
+                            {paginatedDepartments.map((dept) => (
+                                <Card key={dept.id} className="group relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5">
                                     <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         {editingId === dept.id ? (
                                             <>

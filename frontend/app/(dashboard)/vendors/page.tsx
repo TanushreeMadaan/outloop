@@ -12,8 +12,6 @@ import { Vendor } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/Pagination";
 
-const gradientClasses = ["gradient-flow-lilac", "gradient-flow-mint", "gradient-flow-amber", "gradient-flow-rose"];
-
 export default function VendorsPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,6 +77,9 @@ export default function VendorsPage() {
     return filteredVendors.slice(start, end);
   }, [filteredVendors, page, pageSize]);
 
+  const hasContactInfo = (vendor: Vendor) =>
+    Boolean(vendor.email || vendor.phoneNo || vendor.gstNumber);
+
   const handleEdit = (vendor: Vendor) => {
     setSelectedVendor(vendor);
     setIsModalOpen(true);
@@ -137,20 +138,20 @@ export default function VendorsPage() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {paginatedVendors.map((vendor, index) => (
+            {paginatedVendors.map((vendor) => (
               <Card
                 key={vendor.id}
-                className={`group soft-gradient-card ${gradientClasses[index % gradientClasses.length]} relative overflow-hidden transition-all duration-200 hover:-translate-y-1`}
+                className="group relative overflow-hidden transition-all duration-200 hover:-translate-y-1"
               >
                 <CardContent className="p-6">
                   <div className="mb-4 flex items-start justify-between">
-                    <div className="soft-icon-chip h-12 w-12 text-xl font-bold text-[rgb(104,114,176)]">
+                    <div className="soft-icon-chip h-12 w-12 bg-secondary text-xl font-bold text-foreground">
                       {vendor.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => handleEdit(vendor)}
-                        className="rounded-full p-2 text-muted-foreground transition hover:bg-[rgba(217,223,248,0.7)] hover:text-[rgb(104,114,176)]"
+                        className="rounded-full p-2 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path
@@ -163,7 +164,7 @@ export default function VendorsPage() {
                       </button>
                       <button
                         onClick={() => handleDelete(vendor.id)}
-                        className="rounded-full p-2 text-muted-foreground transition hover:bg-[rgba(246,221,223,0.72)] hover:text-[rgb(170,97,112)]"
+                        className="rounded-full p-2 text-muted-foreground transition hover:bg-primary/12 hover:text-primary"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path
@@ -198,8 +199,13 @@ export default function VendorsPage() {
                       )}
                       {vendor.gstNumber && (
                         <div className="flex items-center text-sm">
-                          <span className="mr-2 rounded-full border border-white/75 bg-[rgba(217,223,248,0.86)] px-2 py-0.5 text-[10px] font-semibold text-[rgb(104,114,176)]">GST</span>
+                          <span className="mr-2 rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] font-semibold text-foreground">GST</span>
                           <span className="font-mono tracking-tighter text-foreground/78">{vendor.gstNumber}</span>
+                        </div>
+                      )}
+                      {!hasContactInfo(vendor) && (
+                        <div className="rounded-full border border-border bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                          No contact info
                         </div>
                       )}
                     </div>

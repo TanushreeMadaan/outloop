@@ -9,11 +9,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[linear-gradient(135deg,rgba(145,156,226,0.96),rgba(122,136,214,0.92))] text-primary-foreground shadow-[0_18px_36px_-24px_rgba(122,136,214,0.9)] hover:brightness-[1.03] hover:-translate-y-px",
-        destructive: "bg-[linear-gradient(135deg,rgba(235,170,164,0.98),rgba(219,136,128,0.92))] text-white shadow-[0_18px_36px_-24px_rgba(219,136,128,0.85)] hover:brightness-[1.03] hover:-translate-y-px",
-        outline: "border-border/70 bg-white/72 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] hover:border-border hover:bg-white/88",
-        secondary: "border-border/60 bg-secondary/70 text-secondary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] hover:bg-secondary/90",
-        ghost: "text-muted-foreground hover:bg-white/70 hover:text-foreground",
+        default: "bg-primary text-primary-foreground shadow-[0_16px_30px_-18px_rgba(31,122,140,0.52)] hover:bg-[#176878] hover:-translate-y-px",
+        destructive: "bg-destructive text-white shadow-[0_16px_30px_-18px_rgba(215,101,101,0.42)] hover:bg-[#c45757] hover:-translate-y-px",
+        outline: "border-border bg-card text-foreground shadow-sm hover:border-primary/45 hover:bg-secondary/24",
+        secondary: "border-border bg-secondary text-secondary-foreground shadow-sm hover:bg-[#afd1f3]",
+        ghost: "text-muted-foreground hover:bg-secondary/28 hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

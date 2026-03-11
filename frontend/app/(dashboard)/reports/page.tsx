@@ -13,10 +13,28 @@ import { TableSkeleton } from "@/components/TableSkeleton";
 import { FileDown, TrendingUp, BarChart3, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const COLORS = ['#c8d2f6', '#ddd0f1', '#f4d9bf', '#d8ead8', '#f1c9c0', '#d6ddf3'];
+const COLORS = ['#1F7A8C', '#BFDBF7', '#E1E5F2'];
+const gridColor = "#d5dde8";
+const tickColor = "#607286";
+const tooltipStyle = {
+    borderRadius: "16px",
+    border: "1px solid rgba(2,43,58,0.08)",
+    boxShadow: "0 24px 60px -40px rgba(2,43,58,0.28)",
+    background: "rgba(255,255,255,0.98)",
+};
+
+type TrendRow = {
+    date: string;
+    total: number;
+    returnable: number;
+    consumable: number;
+};
+
+type CsvValue = string | number | boolean | null | undefined;
+type CsvRow = Record<string, CsvValue>;
 
 export default function ReportsPage() {
-    const { data: trends = [], isLoading: isLoadingTrends } = useQuery({
+    const { data: trends = [], isLoading: isLoadingTrends } = useQuery<TrendRow[]>({
         queryKey: ["report-trends"],
         queryFn: getTransactionTrends,
     });
@@ -42,10 +60,10 @@ export default function ReportsPage() {
         { name: 'Pending', value: accuracy.pending },
     ] : [];
 
-    const handleExportCSV = (data: any[], filename: string) => {
+    const handleExportCSV = (data: CsvRow[], filename: string) => {
         if (!data.length) return;
         const headers = Object.keys(data[0]).join(",");
-        const rows = data.map(obj => Object.values(obj).join(",")).join("\n");
+        const rows = data.map(obj => Object.values(obj).map((value) => String(value ?? "")).join(",")).join("\n");
         const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + rows;
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -80,26 +98,18 @@ export default function ReportsPage() {
                 <Card className="overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
                         <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5 text-[rgb(128,142,196)]" />
+                            <TrendingUp className="w-5 h-5 text-primary" />
                             Transaction Trends
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={trends}>
-                                <defs>
-                                    <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#c8d2f6" stopOpacity={0.9} />
-                                        <stop offset="95%" stopColor="#c8d2f6" stopOpacity={0.05} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ece9f3" />
-                                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ba3bf' }} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ba3bf' }} />
-                                <Tooltip
-                                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.72)', boxShadow: '0 24px 60px -36px rgba(118,112,156,0.42)', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(18px)' }}
-                                />
-                                <Area type="monotone" dataKey="total" stroke="#9fafe8" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: tickColor }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: tickColor }} />
+                                <Tooltip contentStyle={tooltipStyle} />
+                                <Area type="monotone" dataKey="total" stroke="#1F7A8C" strokeWidth={3} fillOpacity={1} fill="#BFDBF7" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -109,7 +119,7 @@ export default function ReportsPage() {
                 <Card className="overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
                         <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                            <Target className="w-5 h-5 text-[rgb(143,132,192)]" />
+                            <Target className="w-5 h-5 text-primary" />
                             Return Performance
                         </CardTitle>
                     </CardHeader>
@@ -129,9 +139,7 @@ export default function ReportsPage() {
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip
-                                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.72)', boxShadow: '0 24px 60px -36px rgba(118,112,156,0.42)', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(18px)' }}
-                                />
+                                <Tooltip contentStyle={tooltipStyle} />
                                 <Legend verticalAlign="bottom" height={36} />
                             </PieChart>
                         </ResponsiveContainer>
@@ -142,21 +150,21 @@ export default function ReportsPage() {
                 <Card className="overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
                         <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-[rgb(94,144,117)]" />
+                            <BarChart3 className="w-5 h-5 text-primary" />
                             Activity by Department
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={deptStats}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ece9f3" />
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: tickColor }} />
                                 <Tooltip
-                                    cursor={{ fill: '#f8fafc' }}
-                                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.72)', boxShadow: '0 24px 60px -36px rgba(118,112,156,0.42)', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(18px)' }}
+                                    cursor={{ fill: '#E1E5F2' }}
+                                    contentStyle={tooltipStyle}
                                 />
-                                <Bar dataKey="transactions" fill="#d8ead8" radius={[6, 6, 0, 0]} barSize={40} />
+                                <Bar dataKey="transactions" fill="#1F7A8C" radius={[6, 6, 0, 0]} barSize={40} />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -166,21 +174,21 @@ export default function ReportsPage() {
                 <Card className="overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
                         <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-[rgb(176,131,82)]" />
+                            <BarChart3 className="w-5 h-5 text-primary" />
                             Top Vendors
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart layout="vertical" data={vendorStats.slice(0, 8)}>
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#ece9f3" />
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={gridColor} />
                                 <XAxis type="number" axisLine={false} tickLine={false} hide />
-                                <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} width={100} />
+                                <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} width={100} />
                                 <Tooltip
-                                    cursor={{ fill: '#f8fafc' }}
-                                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.72)', boxShadow: '0 24px 60px -36px rgba(118,112,156,0.42)', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(18px)' }}
+                                    cursor={{ fill: '#E1E5F2' }}
+                                    contentStyle={tooltipStyle}
                                 />
-                                <Bar dataKey="transactions" fill="#f4d9bf" radius={[0, 6, 6, 0]} barSize={20} />
+                                <Bar dataKey="transactions" fill="#BFDBF7" radius={[0, 6, 6, 0]} barSize={20} />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -203,12 +211,12 @@ export default function ReportsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">
-                            {trends.map((item: any) => (
+                            {trends.map((item) => (
                                 <tr key={item.date} className="table-row">
                                     <td className="p-6 font-medium text-foreground">{item.date}</td>
                                     <td className="p-6 font-bold text-foreground">{item.total}</td>
-                                    <td className="p-6 font-semibold text-[rgb(176,131,82)]">{item.returnable}</td>
-                                    <td className="p-6 font-semibold text-[rgb(86,140,112)]">{item.consumable}</td>
+                                    <td className="p-6 font-semibold text-primary">{item.returnable}</td>
+                                    <td className="p-6 font-semibold text-foreground/72">{item.consumable}</td>
                                 </tr>
                             ))}
                         </tbody>
