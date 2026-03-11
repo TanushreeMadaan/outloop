@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,13 +39,23 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md border">
+      <Card className="w-full max-w-md border shadow-[0_20px_50px_-30px_rgba(2,43,58,0.3)]">
         <CardContent className="p-8">
-          <div className="mb-8 text-center">
-            <h1 className="text-2xl font-semibold text-gray-900">
+          <div className="mb-8 flex flex-col items-center text-center">
+            <Image
+              src="/outloop-logo.svg"
+              alt="Outloop"
+              width={180}
+              height={49}
+              className="mb-5 h-auto"
+            />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#2C7A7B]">
+              Hello again
+            </p>
+            <h1 className="mt-3 text-2xl font-semibold text-gray-900">
               Welcome back
             </h1>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="mt-2 text-sm text-gray-500">
               Sign in to manage mall assets
             </p>
           </div>
