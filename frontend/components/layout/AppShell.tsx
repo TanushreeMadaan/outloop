@@ -132,7 +132,7 @@ export default function AppShell({
         <div className="absolute bottom-[-5rem] left-[20%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(222,239,229,0.58),transparent_68%)] blur-3xl" />
       </div>
 
-      <aside className="app-shell-surface hairline-border sticky top-0 hidden h-screen w-64 flex-col overflow-hidden border-r border-white/65 md:flex">
+      <aside className="app-shell-surface hairline-border sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-hidden border-r border-white/65 md:flex">
         <SidebarContent filteredNavItems={filteredNavItems} pathname={pathname} user={user} handleLogout={handleLogout} />
       </aside>
 
@@ -150,7 +150,7 @@ export default function AppShell({
         </Sheet>
       </div>
 
-      <main className="relative flex-1 min-h-screen pt-16 md:pt-0">
+      <main className="relative min-h-screen min-w-0 flex-1 pt-16 md:pt-0">
         {children}
       </main>
     </div>
