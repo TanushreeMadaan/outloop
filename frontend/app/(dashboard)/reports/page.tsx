@@ -4,16 +4,16 @@ import { useQuery } from "@tanstack/react-query";
 import { getTransactionTrends, getDepartmentStats, getVendorStats, getReturnAccuracy } from "@/lib/api/reports";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+    XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     PieChart, Pie, Cell,
     BarChart, Bar,
     AreaChart, Area
 } from "recharts";
 import { TableSkeleton } from "@/components/TableSkeleton";
-import { FileDown, TrendingUp, BarChart3, PieChart as PieChartIcon, Target } from "lucide-react";
+import { FileDown, TrendingUp, BarChart3, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#6366f1'];
+const COLORS = ['#c8d2f6', '#ddd0f1', '#f4d9bf', '#d8ead8', '#f1c9c0', '#d6ddf3'];
 
 export default function ReportsPage() {
     const { data: trends = [], isLoading: isLoadingTrends } = useQuery({
@@ -57,18 +57,18 @@ export default function ReportsPage() {
     };
 
     if (isLoadingTrends || isLoadingDepts || isLoadingVendors || isLoadingAccuracy) {
-        return <div className="p-8"><TableSkeleton columns={4} /></div>;
+        return <div className="page-shell"><TableSkeleton columns={4} /></div>;
     }
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-10">
+        <div className="page-shell mx-auto max-w-7xl space-y-10">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-gray-900 tracking-tight">System Analytics</h1>
-                    <p className="text-gray-500 mt-2 font-medium">Deep dive into transaction patterns and organizational performance.</p>
+                    <h1 className="page-title">System Analytics</h1>
+                    <p className="page-subtitle">Deep dive into transaction patterns and organizational performance.</p>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="rounded-2xl" onClick={() => handleExportCSV(trends, "transaction_trends")}>
+                    <Button variant="outline" onClick={() => handleExportCSV(trends, "transaction_trends")}>
                         <FileDown className="w-4 h-4 mr-2" />
                         Export Trends
                     </Button>
@@ -77,10 +77,10 @@ export default function ReportsPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Transaction Trends */}
-                <Card className="rounded-3xl border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
+                <Card className="overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
-                        <CardTitle className="text-lg font-bold flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5 text-blue-500" />
+                        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                            <TrendingUp className="w-5 h-5 text-[rgb(128,142,196)]" />
                             Transaction Trends
                         </CardTitle>
                     </CardHeader>
@@ -89,27 +89,27 @@ export default function ReportsPage() {
                             <AreaChart data={trends}>
                                 <defs>
                                     <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
-                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#c8d2f6" stopOpacity={0.9} />
+                                        <stop offset="95%" stopColor="#c8d2f6" stopOpacity={0.05} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ece9f3" />
+                                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ba3bf' }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ba3bf' }} />
                                 <Tooltip
-                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.72)', boxShadow: '0 24px 60px -36px rgba(118,112,156,0.42)', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(18px)' }}
                                 />
-                                <Area type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
+                                <Area type="monotone" dataKey="total" stroke="#9fafe8" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>
 
                 {/* Return Accuracy */}
-                <Card className="rounded-3xl border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
+                <Card className="overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
-                        <CardTitle className="text-lg font-bold flex items-center gap-2">
-                            <Target className="w-5 h-5 text-purple-500" />
+                        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                            <Target className="w-5 h-5 text-[rgb(143,132,192)]" />
                             Return Performance
                         </CardTitle>
                     </CardHeader>
@@ -130,7 +130,7 @@ export default function ReportsPage() {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.72)', boxShadow: '0 24px 60px -36px rgba(118,112,156,0.42)', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(18px)' }}
                                 />
                                 <Legend verticalAlign="bottom" height={36} />
                             </PieChart>
@@ -139,48 +139,48 @@ export default function ReportsPage() {
                 </Card>
 
                 {/* Department Activity */}
-                <Card className="rounded-3xl border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
+                <Card className="overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
-                        <CardTitle className="text-lg font-bold flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-emerald-500" />
+                        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-[rgb(94,144,117)]" />
                             Activity by Department
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={deptStats}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ece9f3" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                                 <Tooltip
                                     cursor={{ fill: '#f8fafc' }}
-                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.72)', boxShadow: '0 24px 60px -36px rgba(118,112,156,0.42)', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(18px)' }}
                                 />
-                                <Bar dataKey="transactions" fill="#10b981" radius={[6, 6, 0, 0]} barSize={40} />
+                                <Bar dataKey="transactions" fill="#d8ead8" radius={[6, 6, 0, 0]} barSize={40} />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>
 
                 {/* Vendor Usage */}
-                <Card className="rounded-3xl border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
+                <Card className="overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
-                        <CardTitle className="text-lg font-bold flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-amber-500" />
+                        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-[rgb(176,131,82)]" />
                             Top Vendors
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart layout="vertical" data={vendorStats.slice(0, 8)}>
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#ece9f3" />
                                 <XAxis type="number" axisLine={false} tickLine={false} hide />
                                 <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} width={100} />
                                 <Tooltip
                                     cursor={{ fill: '#f8fafc' }}
-                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.72)', boxShadow: '0 24px 60px -36px rgba(118,112,156,0.42)', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(18px)' }}
                                 />
-                                <Bar dataKey="transactions" fill="#f59e0b" radius={[0, 6, 6, 0]} barSize={20} />
+                                <Bar dataKey="transactions" fill="#f4d9bf" radius={[0, 6, 6, 0]} barSize={20} />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -188,27 +188,27 @@ export default function ReportsPage() {
             </div>
 
             {/* Details Table */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden shadow-gray-200/50 mt-10">
+            <div className="table-shell mt-10">
                 <CardHeader className="p-6">
-                    <CardTitle className="text-lg font-bold">Activity Log Summary</CardTitle>
+                    <CardTitle className="text-lg font-semibold">Activity Log Summary</CardTitle>
                 </CardHeader>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-100 font-bold uppercase tracking-wider text-gray-400 text-[11px]">
+                            <tr className="table-head">
                                 <th className="p-6">Date</th>
                                 <th className="p-6">Total Transactions</th>
                                 <th className="p-6">Returnable</th>
                                 <th className="p-6">Consumable</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-border/60">
                             {trends.map((item: any) => (
-                                <tr key={item.date} className="hover:bg-gray-50/50 transition-colors">
-                                    <td className="p-6 font-medium text-gray-950">{item.date}</td>
-                                    <td className="p-6 font-bold">{item.total}</td>
-                                    <td className="p-6 text-amber-600 font-semibold">{item.returnable}</td>
-                                    <td className="p-6 text-emerald-600 font-semibold">{item.consumable}</td>
+                                <tr key={item.date} className="table-row">
+                                    <td className="p-6 font-medium text-foreground">{item.date}</td>
+                                    <td className="p-6 font-bold text-foreground">{item.total}</td>
+                                    <td className="p-6 font-semibold text-[rgb(176,131,82)]">{item.returnable}</td>
+                                    <td className="p-6 font-semibold text-[rgb(86,140,112)]">{item.consumable}</td>
                                 </tr>
                             ))}
                         </tbody>

@@ -1,15 +1,13 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getTransactions, createTransaction, updateTransaction, deleteTransaction, markAsReturned } from "@/lib/api/transactions";
+import { getTransactions, createTransaction, updateTransaction, markAsReturned } from "@/lib/api/transactions";
 import { useState, useMemo } from "react";
 import { TransactionModal } from "@/components/TransactionModal";
 import { ReturnModal } from "@/components/ReturnModal";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
-import { Transaction, Item, Vendor, Department } from "@/types";
-
-import { Card, CardContent } from "@/components/ui/card";
+import { Transaction } from "@/types";
 import { Pagination } from "@/components/Pagination";
 import { TableSkeleton } from "@/components/TableSkeleton";
 import { DateRangePicker } from "@/components/DateRangePicker";
@@ -31,7 +29,7 @@ export default function TransactionsPage() {
         queryFn: () => getTransactions(),
     });
 
-    const transactions = transactionsRes?.data || [];
+    const transactions = useMemo(() => transactionsRes?.data ?? [], [transactionsRes?.data]);
 
     const createMutation = useMutation({
         mutationFn: createTransaction,
@@ -65,7 +63,7 @@ export default function TransactionsPage() {
     const filteredTransactions = useMemo(() => {
         const q = searchQuery.toLowerCase();
 
-        let startDate: Date | null = dateRange?.from || null;
+        const startDate: Date | null = dateRange?.from || null;
         let endExclusive: Date | null = null;
 
         if (dateRange?.to) {
@@ -133,12 +131,12 @@ export default function TransactionsPage() {
     };
 
     return (
-        <div className="min-h-[calc(100vh-100px)] p-4 md:p-8 bg-white">
+        <div className="page-shell">
 
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="page-header">
                 <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Transactions</h1>
-                    <p className="text-sm text-gray-500 mt-1">Monitor inward and outward item movements</p>
+                    <h1 className="page-title">Transactions</h1>
+                    <p className="page-subtitle">Monitor inward and outward item movements</p>
                 </div>
                 <Button onClick={handleAdd}>
                     <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -151,19 +149,24 @@ export default function TransactionsPage() {
             <div className="mb-6 flex flex-col gap-4">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div className="flex-1">
-                        <input
-                            type="text"
-                            placeholder="Search by vendor, department or remarks..."
-                            value={searchQuery}
-                            onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                setPage(1);
-                            }}
-                            className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all border-gray-200 bg-gray-50/30"
-                        />
+                        <div className="relative">
+                            <svg className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input
+                                type="text"
+                                placeholder="Search by vendor, department or remarks..."
+                                value={searchQuery}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setPage(1);
+                                }}
+                                className="control-input pl-11"
+                            />
+                        </div>
                     </div>
                     <div className="flex flex-col gap-1 w-full md:w-72">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Date Range</label>
+                        <label className="control-label">Date Range</label>
                         <DateRangePicker
                             date={dateRange}
                             setDate={(range) => {
@@ -174,7 +177,7 @@ export default function TransactionsPage() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 p-1 bg-gray-50 w-fit rounded-2xl border border-gray-100">
+                <div className="filter-rail">
                     {(["ALL", "ACTIVE", "COMPLETED", "OVERDUE"] as const).map((status) => (
                         <button
                             key={status}
@@ -182,9 +185,9 @@ export default function TransactionsPage() {
                                 setStatusFilter(status);
                                 setPage(1);
                             }}
-                            className={`px-6 py-2 text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all ${statusFilter === status
-                                ? "bg-white text-purple-700 shadow-sm border border-purple-100"
-                                : "text-gray-400 hover:text-gray-600"
+                            className={`filter-pill ${statusFilter === status
+                                ? "filter-pill-active"
+                                : "hover:text-foreground"
                                 }`}
                         >
                             {status}
@@ -194,17 +197,17 @@ export default function TransactionsPage() {
             </div>
 
             {isLoading ? (
-                <div className="w-full overflow-hidden rounded-2xl border bg-white/60 backdrop-blur-md shadow-sm">
+                <div className="table-shell">
                     <div className="p-4">
                         <TableSkeleton columns={7} rows={8} />
                     </div>
                 </div>
             ) : (
-                <div className="w-full overflow-hidden rounded-2xl border bg-white/60 backdrop-blur-md shadow-sm">
+                <div className="table-shell">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="border-b bg-gray-50/50 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                                <tr className="table-head">
                                     <th className="px-6 py-4">ID & Date</th>
                                     <th className="px-6 py-4">Vendor</th>
                                     <th className="px-6 py-4">Department</th>
@@ -216,18 +219,18 @@ export default function TransactionsPage() {
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-border/60">
                                 {paginatedTransactions.map((transaction: Transaction) => (
                                     <tr
                                         key={transaction.id}
-                                        className="group transition-colors hover:bg-white/80"
+                                        className="table-row group"
                                     >
                                         <td className="px-6 py-5">
                                             <div className="flex flex-col gap-1">
-                                                <span className="font-mono text-[10px] text-gray-400">
+                                                <span className="font-mono text-[10px] text-muted-foreground">
                                                     #{transaction.id.slice(0, 8)}
                                                 </span>
-                                                <span className="text-xs font-medium text-gray-600">
+                                                <span className="text-xs font-medium text-foreground/78">
                                                     {new Date(transaction.createdAt).toLocaleDateString(undefined, {
                                                         month: 'short',
                                                         day: 'numeric',
@@ -237,17 +240,17 @@ export default function TransactionsPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className="text-sm font-semibold text-gray-900">{transaction.vendor.name}</span>
+                                            <span className="text-sm font-semibold text-foreground">{transaction.vendor.name}</span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className="text-sm font-medium text-purple-700">{transaction.department.name}</span>
+                                            <span className="text-sm font-medium text-[rgb(115,124,178)]">{transaction.department.name}</span>
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex flex-wrap gap-1.5 max-w-[240px]">
                                                 {transaction.items.map((it: any) => (
                                                     <span
                                                         key={it.item.id}
-                                                        className="px-2 py-0.5 text-[10px] font-semibold bg-gray-100/80 text-gray-600 rounded-md border border-gray-200"
+                                                        className="rounded-full border border-white/75 bg-[rgba(246,244,249,0.88)] px-2.5 py-0.5 text-[10px] font-semibold text-muted-foreground"
                                                     >
                                                         {it.item.name}
                                                     </span>
@@ -255,19 +258,19 @@ export default function TransactionsPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-5 text-center">
-                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${transaction.isReturnable
-                                                ? "bg-amber-50 text-amber-600 border border-amber-100"
-                                                : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                            <span className={`status-pill ${transaction.isReturnable
+                                                ? "bg-[linear-gradient(135deg,rgba(249,229,191,0.96),rgba(244,214,167,0.92))] text-[rgb(165,119,67)]"
+                                                : "bg-[linear-gradient(135deg,rgba(218,239,225,0.96),rgba(192,227,205,0.92))] text-[rgb(77,127,100)]"
                                                 }`}>
                                                 {transaction.isReturnable ? "Returnable" : "Consumable"}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5 text-center">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${transaction.status === 'COMPLETED'
-                                                ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                            <span className={`status-pill ${transaction.status === 'COMPLETED'
+                                                ? "bg-[linear-gradient(135deg,rgba(218,239,225,0.96),rgba(192,227,205,0.92))] text-[rgb(77,127,100)]"
                                                 : new Date(transaction.expectedReturnDate!) < new Date() && transaction.status === 'ACTIVE'
-                                                    ? "bg-rose-50 text-rose-600 border border-rose-100 animate-pulse"
-                                                    : "bg-purple-50 text-purple-600 border border-purple-100"
+                                                    ? "animate-pulse bg-[linear-gradient(135deg,rgba(248,220,225,0.98),rgba(240,196,205,0.94))] text-[rgb(163,87,104)]"
+                                                    : "bg-[linear-gradient(135deg,rgba(214,221,249,0.98),rgba(193,204,243,0.92))] text-[rgb(96,107,164)]"
                                                 }`}>
                                                 {transaction.status === 'COMPLETED' ? 'Completed' : (new Date(transaction.expectedReturnDate!) < new Date() ? 'Overdue' : 'Active')}
                                             </span>
@@ -276,33 +279,33 @@ export default function TransactionsPage() {
                                             <div className="flex flex-col gap-1.5">
                                                 {transaction.isReturnable && (
                                                     <div className="flex flex-col gap-0.5">
-                                                        <span className="text-xs font-semibold text-gray-700">
+                                                        <span className="text-xs font-semibold text-foreground/78">
                                                             {new Date(transaction.expectedReturnDate!).toLocaleDateString(undefined, {
                                                                 month: 'short',
                                                                 day: 'numeric',
                                                                 year: 'numeric'
                                                             })}
                                                         </span>
-                                                        <span className="text-[10px] text-gray-400 font-medium">Expected Return</span>
+                                                        <span className="text-[10px] font-medium text-muted-foreground">Expected Return</span>
                                                     </div>
                                                 )}
                                                 {transaction.actualReturnDate && (
-                                                    <div className="flex flex-col gap-0.5 border-t pt-1 border-gray-100">
-                                                        <span className="text-xs font-semibold text-emerald-600">
+                                                    <div className="flex flex-col gap-0.5 border-t border-border/60 pt-1">
+                                                        <span className="text-xs font-semibold text-[rgb(86,140,112)]">
                                                             {new Date(transaction.actualReturnDate).toLocaleDateString(undefined, {
                                                                 month: 'short',
                                                                 day: 'numeric',
                                                                 year: 'numeric'
                                                             })}
                                                         </span>
-                                                        <span className="text-[10px] text-emerald-400 font-medium font-mono lowercase">actual return</span>
+                                                        <span className="text-[10px] font-mono font-medium lowercase text-[rgb(116,164,134)]">actual return</span>
                                                     </div>
                                                 )}
-                                                {!transaction.isReturnable && <span className="text-gray-300 text-xs">-</span>}
+                                                {!transaction.isReturnable && <span className="text-xs text-muted-foreground/60">-</span>}
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <p className="text-xs text-gray-500 line-clamp-1 max-w-[200px]" title={transaction.remarks || ""}>
+                                            <p className="line-clamp-1 max-w-[200px] text-xs text-muted-foreground" title={transaction.remarks || ""}>
                                                 {transaction.remarks || "-"}
                                             </p>
                                         </td>
@@ -311,14 +314,14 @@ export default function TransactionsPage() {
                                                 {transaction.status === 'ACTIVE' && (
                                                     <Button
                                                         onClick={() => handleReturn(transaction)}
-                                                        className="mr-2 h-9 px-4 text-xs font-semibold shadow-sm hover:shadow-md transition-all whitespace-nowrap"
+                                                        className="mr-2 h-9 whitespace-nowrap px-4 text-xs font-semibold"
                                                     >
                                                         Mark Returned
                                                     </Button>
                                                 )}
                                                 <button
                                                     onClick={() => handleEdit(transaction)}
-                                                    className="rounded-lg p-2 text-gray-400 hover:bg-purple-50 hover:text-purple-600 transition"
+                                                    className="rounded-full p-2 text-muted-foreground transition hover:bg-[rgba(217,223,248,0.7)] hover:text-[rgb(104,114,176)]"
                                                 >
                                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -342,14 +345,14 @@ export default function TransactionsPage() {
             />
 
             {isFetched && filteredTransactions.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 bg-white/40 rounded-3xl border border-dashed">
-                    <div className="h-16 w-16 mb-4 bg-gray-50 rounded-full flex items-center justify-center text-gray-400">
+                <div className="empty-state">
+                    <div className="soft-icon-chip mb-4 h-16 w-16 text-muted-foreground">
                         <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900">No transactions found</h3>
-                    <p className="text-gray-500 mt-1">Try adjusting your filters or record a new entry</p>
+                    <h3 className="text-lg font-medium text-foreground">No transactions found</h3>
+                    <p className="mt-1 text-muted-foreground">Try adjusting your filters or record a new entry</p>
                 </div>
             )}
 

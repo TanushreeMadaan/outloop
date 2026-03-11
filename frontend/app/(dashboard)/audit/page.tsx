@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAuditLogs } from "@/lib/api/audit";
 
-import { Calendar, User, Activity, ShieldCheck, ChevronDown, ChevronUp, ArrowRight, Clock, Box, HardDrive, UserCheck } from "lucide-react";
+import { Activity, ShieldCheck, ChevronDown, Clock, Box, UserCheck } from "lucide-react";
 import { useMemo, useState, Fragment } from "react";
 import { Pagination } from "@/components/Pagination";
 import { TableSkeleton } from "@/components/TableSkeleton";
@@ -23,10 +23,10 @@ export default function AuditLogsPage() {
 
     const getActionColor = (action: string) => {
         switch (action.toUpperCase()) {
-            case "CREATE": return "bg-emerald-50 text-emerald-600 border-emerald-100";
-            case "UPDATE": return "bg-amber-50 text-amber-600 border-amber-100";
-            case "DELETE": return "bg-red-50 text-red-600 border-red-100";
-            default: return "bg-gray-50 text-gray-600 border-gray-100";
+            case "CREATE": return "bg-[rgba(222,238,228,0.86)] text-[rgb(86,140,112)] border-white/70";
+            case "UPDATE": return "bg-[rgba(248,232,207,0.86)] text-[rgb(176,131,82)] border-white/70";
+            case "DELETE": return "bg-[rgba(246,221,223,0.88)] text-[rgb(170,97,112)] border-white/70";
+            default: return "bg-[rgba(246,244,249,0.88)] text-muted-foreground border-white/70";
         }
     };
 
@@ -72,7 +72,7 @@ export default function AuditLogsPage() {
     const filteredLogs = useMemo(() => {
         if (!logs) return [];
 
-        let startDate: Date | null = dateRange?.from || null;
+        const startDate: Date | null = dateRange?.from || null;
         let endExclusive: Date | null = null;
 
         if (dateRange?.to) {
@@ -96,22 +96,22 @@ export default function AuditLogsPage() {
     }, [filteredLogs, page, pageSize]);
 
     return (
-        <div className="relative min-h-[calc(100vh-100px)] space-y-8 p-4 md:p-8 overflow-hidden font-[family-name:var(--font-geist-sans)]">
+        <div className="page-shell relative space-y-8 overflow-hidden font-[family-name:var(--font-geist-sans)]">
 
 
             <div className="flex flex-col gap-3 text-left md:flex-row md:items-end md:justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="p-3 bg-white/50 backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-sm">
-                        <ShieldCheck className="w-8 h-8 text-purple-600" />
+                    <div className="soft-icon-chip h-14 w-14">
+                        <ShieldCheck className="w-7 h-7 text-[rgb(104,114,176)]" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-gray-900 leading-tight">Audit Logs</h1>
-                        <p className="text-sm text-muted-foreground font-medium">A complete history of all activities and changes</p>
+                        <h1 className="page-title leading-tight">Audit Logs</h1>
+                        <p className="page-subtitle">A complete history of all activities and changes</p>
                     </div>
                 </div>
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
                     <div className="flex flex-col gap-1 w-full md:w-72">
-                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest ml-1">
+                        <label className="control-label">
                             Date Range
                         </label>
                         <DateRangePicker
@@ -125,17 +125,17 @@ export default function AuditLogsPage() {
                 </div>
             </div>
 
-            <div className="w-full overflow-hidden rounded-3xl border bg-white/60 backdrop-blur-md shadow-xl border-gray-200/50">
+            <div className="table-shell">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b bg-gray-50/50 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                            <tr className="table-head">
                                 <th className="px-8 py-5">Activity</th>
                                 <th className="px-6 py-5">Performed By</th>
                                 <th className="px-8 py-5 text-right font-bold">Date & Time</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-border/60">
                             {isLoading ? (
                                 <tr>
                                     <td colSpan={3} className="p-6">
@@ -150,7 +150,7 @@ export default function AuditLogsPage() {
                                             <tr
                                                 key={log.id}
                                                 onClick={() => toggleExpand(log.id)}
-                                                className={`group cursor-pointer transition-all duration-300 hover:bg-white ${isExpanded ? 'bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] z-10 relative' : ''}`}
+                                                className={`group cursor-pointer transition-all duration-300 hover:bg-white/72 ${isExpanded ? 'relative z-10 bg-white/90 shadow-[0_24px_48px_-40px_rgba(118,112,156,0.55)]' : ''}`}
                                             >
                                                 <td className="px-8 py-5">
                                                     <div className="flex items-center gap-4">
@@ -163,47 +163,47 @@ export default function AuditLogsPage() {
                                                             <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border w-fit ${getActionColor(log.action)}`}>
                                                                 {log.action}
                                                             </span>
-                                                            <span className="text-xs font-bold text-gray-900 mt-1 uppercase tracking-tight">{log.entityType}</span>
+                                                            <span className="mt-1 text-xs font-bold uppercase tracking-tight text-foreground">{log.entityType}</span>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-5">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100 group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
+                                                        <div className="soft-icon-chip h-8 w-8 text-muted-foreground transition-colors group-hover:text-[rgb(104,114,176)]">
                                                             <UserCheck className="w-4 h-4" />
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className="text-xs font-bold text-gray-700">{log.performedBy?.email || "System-Admin"}</span>
-                                                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Verified User</span>
+                                                            <span className="text-xs font-bold text-foreground/80">{log.performedBy?.email || "System-Admin"}</span>
+                                                            <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Verified User</span>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-8 py-5 text-right tabular-nums">
                                                     <div className="flex items-center justify-end gap-6 text-right">
                                                         <div className="flex flex-col items-end gap-1">
-                                                            <span className="text-xs font-bold text-gray-800">
+                                                            <span className="text-xs font-bold text-foreground/85">
                                                                 {new Date(log.createdAt).toLocaleDateString(undefined, {
                                                                     month: 'short',
                                                                     day: 'numeric',
                                                                     year: 'numeric'
                                                                 })}
                                                             </span>
-                                                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                                                                 {new Date(log.createdAt).toLocaleTimeString(undefined, {
                                                                     hour: '2-digit',
                                                                     minute: '2-digit'
                                                                 })}
                                                             </span>
                                                         </div>
-                                                        <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-purple-600' : 'text-gray-300'}`}>
+                                                        <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-[rgb(104,114,176)]' : 'text-muted-foreground/50'}`}>
                                                             <ChevronDown className="w-5 h-5 ml-2" />
                                                         </div>
                                                     </div>
                                                 </td>
                                             </tr>
                                             {isExpanded && (
-                                                <tr key={`${log.id}-details`} className="bg-white/40">
-                                                    <td colSpan={3} className="px-8 py-8 border-b border-gray-100">
+                                                <tr key={`${log.id}-details`} className="bg-white/45">
+                                                    <td colSpan={3} className="border-b border-border/60 px-8 py-8">
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-top-4 duration-500">
                                                             <div className="space-y-4">
                                                                 <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 ml-1">

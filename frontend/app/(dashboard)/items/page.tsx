@@ -11,6 +11,8 @@ import { Item } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/Pagination";
 
+const gradientClasses = ["gradient-flow-sky", "gradient-flow-lilac", "gradient-flow-amber", "gradient-flow-mint"];
+
 export default function ItemsPage() {
     const queryClient = useQueryClient();
     const [searchQuery, setSearchQuery] = useState("");
@@ -100,11 +102,11 @@ export default function ItemsPage() {
     };
 
     return (
-        <div className="min-h-[calc(100vh-100px)] p-4 md:p-8 bg-white">
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="page-shell">
+            <div className="page-header">
                 <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Items</h1>
-                    <p className="text-sm text-gray-500 mt-1">Manage and track your mall items</p>
+                    <h1 className="page-title">Items</h1>
+                    <p className="page-subtitle">Manage and track your mall items</p>
                 </div>
                 <Button onClick={handleAdd}>
                     <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -123,7 +125,7 @@ export default function ItemsPage() {
                         setSearchQuery(e.target.value);
                         setPage(1);
                     }}
-                    className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="control-input"
                 />
             </div>
 
@@ -132,17 +134,17 @@ export default function ItemsPage() {
             ) : (
                 <>
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {paginatedItems.map((item) => (
-                            <Card key={item.id} className="border">
+                        {paginatedItems.map((item, index) => (
+                            <Card key={item.id} className={`soft-gradient-card ${gradientClasses[index % gradientClasses.length]} overflow-hidden`}>
                                 <CardContent className="p-4">
                                     <div className="mb-3 flex items-start justify-between">
-                                        <div className="h-10 w-10 rounded bg-blue-50 flex items-center justify-center text-blue-600 font-semibold text-sm">
+                                        <div className="soft-icon-chip h-10 w-10 text-sm font-semibold text-[rgb(104,114,176)]">
                                             {item.name.charAt(0).toUpperCase()}
                                         </div>
                                         <div className="flex gap-1">
                                             <button
                                                 onClick={() => handleEdit(item)}
-                                                className="rounded p-1 text-gray-400 hover:bg-blue-50 hover:text-blue-600"
+                                                className="rounded-full p-1.5 text-muted-foreground transition hover:bg-[rgba(217,223,248,0.7)] hover:text-[rgb(104,114,176)]"
                                             >
                                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path
@@ -155,7 +157,7 @@ export default function ItemsPage() {
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(item.id)}
-                                                className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                                                className="rounded-full p-1.5 text-muted-foreground transition hover:bg-[rgba(246,221,223,0.72)] hover:text-[rgb(170,97,112)]"
                                             >
                                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path
@@ -169,11 +171,11 @@ export default function ItemsPage() {
                                         </div>
                                     </div>
 
-                                    <h3 className="font-medium text-gray-900 text-sm">{item.name}</h3>
-                                    <p className="mt-1 text-xs text-gray-500 line-clamp-2">
+                                    <h3 className="text-sm font-medium text-foreground">{item.name}</h3>
+                                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                                         {item.description || "No description"}
                                     </p>
-                                    <div className="mt-3 text-xs text-gray-400">
+                                    <div className="mt-3 text-xs text-muted-foreground">
                                         {new Date(item.createdAt).toLocaleDateString()}
                                     </div>
                                 </CardContent>
@@ -182,14 +184,14 @@ export default function ItemsPage() {
                     </div>
 
                     {isFetched && filteredItems.length === 0 && (
-                        <div className="flex flex-col items-center justify-center py-20 bg-white/40 rounded-3xl border border-dashed">
-                            <div className="h-16 w-16 mb-4 bg-gray-50 rounded-full flex items-center justify-center text-gray-400">
+                        <div className="empty-state">
+                            <div className="soft-icon-chip mb-4 h-16 w-16 text-muted-foreground">
                                 <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900">No items found</h3>
-                            <p className="text-gray-500 mt-1">Try adjusting your search or add a new item</p>
+                            <h3 className="text-lg font-medium text-foreground">No items found</h3>
+                            <p className="mt-1 text-muted-foreground">Try adjusting your search or add a new item</p>
                         </div>
                     )}
                 </>

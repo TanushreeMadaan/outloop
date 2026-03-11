@@ -23,37 +23,37 @@ function Calendar({
                 months: "flex flex-col sm:flex-row gap-4",
                 month: "flex flex-col gap-4",
                 month_caption: "flex justify-center pt-1 relative items-center h-10 w-full",
-                caption_label: "text-sm font-semibold hidden",
+                caption_label: "hidden text-sm font-semibold",
                 dropdowns: "flex justify-center gap-2 w-full",
-                dropdown: "rounded-md p-1 border border-input bg-background text-sm font-medium focus:ring-2 focus:ring-purple-200 outline-none cursor-pointer appearance-none px-2",
+                dropdown: "rounded-[0.9rem] border border-border/70 bg-white/70 px-3 py-1.5 text-sm font-medium text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] outline-none transition focus:ring-2 focus:ring-ring/50 cursor-pointer appearance-none",
                 dropdown_month: "flex",
                 dropdown_year: "flex",
                 nav: "flex items-center justify-between absolute inset-x-0 w-full px-4 top-10 -translate-y-1/2 z-50 pointer-events-none",
                 button_previous: cn(
                     buttonVariants({ variant: "outline" }),
-                    "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 pointer-events-auto"
+                    "pointer-events-auto size-8 rounded-full bg-white/65 p-0 text-muted-foreground hover:bg-white hover:text-foreground"
                 ),
                 button_next: cn(
                     buttonVariants({ variant: "outline" }),
-                    "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 pointer-events-auto"
+                    "pointer-events-auto size-8 rounded-full bg-white/65 p-0 text-muted-foreground hover:bg-white hover:text-foreground"
                 ),
                 month_grid: "w-full border-collapse",
                 weekdays: "flex",
-                weekday: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] h-9 flex items-center justify-center",
+                weekday: "text-muted-foreground rounded-md w-9 h-9 flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.12em]",
                 week: "flex w-full mt-1",
                 day: cn(
-                    "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 flex items-center justify-center rounded-md transition-all"
+                    "relative flex h-9 w-9 items-center justify-center rounded-[0.9rem] p-0 text-sm transition-all focus-within:z-20 [&:has([aria-selected].day-range-end)]:rounded-r-[0.9rem] [&:has([aria-selected].day-outside)]:bg-accent/40 [&:has([aria-selected])]:bg-accent/55 first:[&:has([aria-selected])]:rounded-l-[0.9rem] last:[&:has([aria-selected])]:rounded-r-[0.9rem]"
                 ),
                 day_button: cn(
                     buttonVariants({ variant: "ghost" }),
-                    "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-purple-100 hover:text-purple-900 transition-colors w-full h-full"
+                    "h-9 w-9 rounded-[0.9rem] p-0 font-medium text-[13px] aria-selected:opacity-100 hover:bg-[rgba(171,180,230,0.18)] hover:text-foreground w-full h-full"
                 ),
                 range_end: "day-range-end",
-                selected: "bg-purple-600 text-white hover:bg-purple-700 hover:text-white focus:bg-purple-700 focus:text-white rounded-md",
-                today: "bg-accent text-accent-foreground font-bold border-2 border-purple-200",
-                outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+                selected: "bg-[linear-gradient(135deg,rgba(205,214,248,0.95),rgba(185,197,241,0.92))] text-[rgb(72,82,128)] shadow-[0_14px_28px_-20px_rgba(156,166,220,0.55)] hover:bg-[linear-gradient(135deg,rgba(205,214,248,0.95),rgba(185,197,241,0.92))] hover:text-[rgb(72,82,128)] focus:bg-[linear-gradient(135deg,rgba(205,214,248,0.95),rgba(185,197,241,0.92))] focus:text-[rgb(72,82,128)] rounded-[0.9rem]",
+                today: "border border-[rgba(199,208,244,0.7)] bg-[rgba(255,255,255,0.92)] text-accent-foreground font-semibold",
+                outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/40 aria-selected:text-muted-foreground aria-selected:opacity-30",
                 disabled: "text-muted-foreground opacity-50",
-                range_middle: "aria-selected:bg-purple-50 aria-selected:text-purple-900 rounded-none",
+                range_middle: "aria-selected:bg-[rgba(216,223,247,0.65)] aria-selected:text-foreground rounded-none",
                 hidden: "invisible",
                 ...classNames,
             }}

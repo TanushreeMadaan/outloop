@@ -4,11 +4,11 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUsers, createUser, updateUser, deleteUser } from "@/lib/api/users";
 import { getDepartments } from "@/lib/api/departments";
-import { User, Role } from "@/types";
+import { User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { UserModal } from "@/components/UserModal";
 import { TableSkeleton } from "@/components/TableSkeleton";
-import { UserPlus, Pencil, Trash2, Mail, Shield, Building, Calendar, MoreVertical, Search } from "lucide-react";
+import { UserPlus, Pencil, Trash2, Building, Calendar, Search } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "react-hot-toast";
 
@@ -83,48 +83,45 @@ export default function UsersPage() {
     );
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8">
-            {/* Header Section */}
+        <div className="page-shell mx-auto max-w-7xl space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-gray-900 tracking-tight">User Management</h1>
-                    <p className="text-gray-500 mt-2 font-medium">Manage organization members and their access levels.</p>
+                    <h1 className="page-title">User Management</h1>
+                    <p className="page-subtitle">Manage organization members and their access levels.</p>
                 </div>
                 <Button
                     onClick={() => { setSelectedUser(null); setIsModalOpen(true); }}
-                    className="rounded-2xl h-14 px-8 bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all active:scale-95 flex gap-3"
+                    className="h-11 gap-3 px-6"
                 >
                     <UserPlus className="w-5 h-5" />
                     <span className="font-bold">Add New User</span>
                 </Button>
             </div>
 
-            {/* Filter & Search Bar */}
             <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-[rgb(104,114,176)]" />
                 <input
                     type="text"
                     placeholder="Search by email or department..."
-                    className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-100 bg-white shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-sm font-medium"
+                    className="control-input h-14 pl-12 pr-4 font-medium"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
 
-            {/* Users Table */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden shadow-gray-200/50">
+            <div className="table-shell">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-100">
-                                <th className="p-6 text-[11px] font-bold uppercase tracking-wider text-gray-400">User Details</th>
-                                <th className="p-6 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-center">Role</th>
-                                <th className="p-6 text-[11px] font-bold uppercase tracking-wider text-gray-400">Department</th>
-                                <th className="p-6 text-[11px] font-bold uppercase tracking-wider text-gray-400">Joined Date</th>
-                                <th className="p-6 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Actions</th>
+                            <tr className="table-head">
+                                <th className="p-6">User Details</th>
+                                <th className="p-6 text-center">Role</th>
+                                <th className="p-6">Department</th>
+                                <th className="p-6">Joined Date</th>
+                                <th className="p-6 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-border/60">
                             {isLoadingUsers ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <tr key={i}>
@@ -133,41 +130,41 @@ export default function UsersPage() {
                                 ))
                             ) : filteredUsers.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="p-12 text-center text-gray-400 font-medium italic">No users found matching your criteria.</td>
+                                    <td colSpan={5} className="p-12 text-center font-medium italic text-muted-foreground">No users found matching your criteria.</td>
                                 </tr>
                             ) : (
                                 filteredUsers.map((user) => (
-                                    <tr key={user.id} className="group hover:bg-gray-50/50 transition-colors">
+                                    <tr key={user.id} className="table-row group">
                                         <td className="p-6">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">
+                                                <div className="soft-icon-chip h-10 w-10 text-lg font-bold text-[rgb(104,114,176)]">
                                                     {user.email[0].toUpperCase()}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-bold text-gray-900">{user.email}</span>
-                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Verified Member</span>
+                                                    <span className="text-sm font-bold text-foreground">{user.email}</span>
+                                                    <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground">Verified Member</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="p-6">
                                             <div className="flex justify-center">
-                                                <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border ${user.role === 'ADMIN'
-                                                    ? 'bg-purple-50 text-purple-600 border-purple-100'
-                                                    : 'bg-blue-50 text-blue-600 border-blue-100'
+                                                <span className={`soft-tag ${user.role === 'ADMIN'
+                                                    ? 'bg-[rgba(217,223,248,0.86)] text-[rgb(104,114,176)]'
+                                                    : 'bg-[rgba(214,230,247,0.86)] text-[rgb(99,132,170)]'
                                                     }`}>
                                                     {user.role}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="p-6">
-                                            <div className="flex items-center gap-2 text-sm text-gray-600 font-semibold">
-                                                <Building className="w-4 h-4 text-gray-300" />
+                                            <div className="flex items-center gap-2 text-sm font-semibold text-foreground/78">
+                                                <Building className="h-4 w-4 text-muted-foreground/70" />
                                                 {user.department?.name || "N/A"}
                                             </div>
                                         </td>
                                         <td className="p-6">
-                                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                                                <Calendar className="w-4 h-4 text-gray-300" />
+                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <Calendar className="h-4 w-4 text-muted-foreground/70" />
                                                 {format(new Date(user.createdAt), "MMM d, yyyy")}
                                             </div>
                                         </td>
@@ -175,14 +172,14 @@ export default function UsersPage() {
                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={() => { setSelectedUser(user); setIsModalOpen(true); }}
-                                                    className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition-colors"
+                                                    className="rounded-full p-2 text-[rgb(104,114,176)] transition-colors hover:bg-[rgba(217,223,248,0.7)]"
                                                     title="Edit User"
                                                 >
                                                     <Pencil className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(user.id)}
-                                                    className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors"
+                                                    className="rounded-full p-2 text-[rgb(170,97,112)] transition-colors hover:bg-[rgba(246,221,223,0.72)]"
                                                     title="Delete User"
                                                 >
                                                     <Trash2 className="w-4 h-4" />

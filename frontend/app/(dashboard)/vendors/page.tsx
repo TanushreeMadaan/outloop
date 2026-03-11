@@ -12,6 +12,8 @@ import { Vendor } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/Pagination";
 
+const gradientClasses = ["gradient-flow-lilac", "gradient-flow-mint", "gradient-flow-amber", "gradient-flow-rose"];
+
 export default function VendorsPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,12 +104,12 @@ export default function VendorsPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-100px)] p-4 md:p-8 bg-white">
+    <div className="page-shell">
 
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Vendors</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your suppliers and service providers</p>
+          <h1 className="page-title">Vendors</h1>
+          <p className="page-subtitle">Manage your suppliers and service providers</p>
         </div>
         <Button onClick={handleAdd}>
           <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,7 +128,7 @@ export default function VendorsPage() {
             setSearchQuery(e.target.value);
             setPage(1);
           }}
-          className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="control-input"
         />
       </div>
 
@@ -135,20 +137,20 @@ export default function VendorsPage() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {paginatedVendors.map((vendor) => (
+            {paginatedVendors.map((vendor, index) => (
               <Card
                 key={vendor.id}
-                className="group relative overflow-hidden rounded-2xl border bg-white/80 backdrop-blur-md transition-all hover:shadow-xl hover:shadow-purple-900/5 hover:-translate-y-1"
+                className={`group soft-gradient-card ${gradientClasses[index % gradientClasses.length]} relative overflow-hidden transition-all duration-200 hover:-translate-y-1`}
               >
                 <CardContent className="p-6">
                   <div className="mb-4 flex items-start justify-between">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-50 to-orange-50 flex items-center justify-center text-purple-700 font-bold text-xl ring-1 ring-purple-100/50">
+                    <div className="soft-icon-chip h-12 w-12 text-xl font-bold text-[rgb(104,114,176)]">
                       {vendor.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => handleEdit(vendor)}
-                        className="rounded-lg p-2 text-gray-400 hover:bg-purple-50 hover:text-purple-600 transition"
+                        className="rounded-full p-2 text-muted-foreground transition hover:bg-[rgba(217,223,248,0.7)] hover:text-[rgb(104,114,176)]"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path
@@ -161,7 +163,7 @@ export default function VendorsPage() {
                       </button>
                       <button
                         onClick={() => handleDelete(vendor.id)}
-                        className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 transition"
+                        className="rounded-full p-2 text-muted-foreground transition hover:bg-[rgba(246,221,223,0.72)] hover:text-[rgb(170,97,112)]"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path
@@ -176,10 +178,10 @@ export default function VendorsPage() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-gray-900">{vendor.name}</h3>
+                    <h3 className="font-semibold text-foreground">{vendor.name}</h3>
                     <div className="mt-3 space-y-2">
                       {vendor.email && (
-                        <div className="flex items-center text-sm text-gray-500">
+                        <div className="flex items-center text-sm text-muted-foreground">
                           <svg className="mr-2 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
@@ -187,7 +189,7 @@ export default function VendorsPage() {
                         </div>
                       )}
                       {vendor.phoneNo && (
-                        <div className="flex items-center text-sm text-gray-500">
+                        <div className="flex items-center text-sm text-muted-foreground">
                           <svg className="mr-2 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                           </svg>
@@ -196,8 +198,8 @@ export default function VendorsPage() {
                       )}
                       {vendor.gstNumber && (
                         <div className="flex items-center text-sm">
-                          <span className="mr-2 rounded bg-purple-50 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 ring-1 ring-purple-100">GST</span>
-                          <span className="text-gray-600 font-mono tracking-tighter">{vendor.gstNumber}</span>
+                          <span className="mr-2 rounded-full border border-white/75 bg-[rgba(217,223,248,0.86)] px-2 py-0.5 text-[10px] font-semibold text-[rgb(104,114,176)]">GST</span>
+                          <span className="font-mono tracking-tighter text-foreground/78">{vendor.gstNumber}</span>
                         </div>
                       )}
                     </div>
@@ -208,14 +210,14 @@ export default function VendorsPage() {
           </div>
 
           {isFetched && filteredVendors.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 bg-white/40 rounded-3xl border border-dashed">
-              <div className="h-16 w-16 mb-4 bg-gray-50 rounded-full flex items-center justify-center text-gray-400">
+            <div className="empty-state">
+              <div className="soft-icon-chip mb-4 h-16 w-16 text-muted-foreground">
                 <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 005.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900">No vendors found</h3>
-              <p className="text-gray-500 mt-1">Try adjusting your search or add a new vendor</p>
+              <h3 className="text-lg font-medium text-foreground">No vendors found</h3>
+              <p className="mt-1 text-muted-foreground">Try adjusting your search or add a new vendor</p>
             </div>
           )}
         </>

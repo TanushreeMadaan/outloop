@@ -7,10 +7,12 @@ import { getDepartments, createDepartment, updateDepartment, deleteDepartment } 
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Store, Calendar, ArrowRight, Pencil, Trash2, Check, X, Loader2 } from "lucide-react";
+import { Plus, Store, Calendar, Pencil, Trash2, Check, X, Loader2 } from "lucide-react";
 import { ItemSkeleton } from "@/components/ItemSkeleton";
 import { Department } from "@/types";
 import { Pagination } from "@/components/Pagination";
+
+const gradientClasses = ["gradient-flow-lilac", "gradient-flow-sky", "gradient-flow-mint", "gradient-flow-rose"];
 
 export default function DepartmentsPage() {
     const queryClient = useQueryClient();
@@ -91,32 +93,32 @@ export default function DepartmentsPage() {
     })();
 
     return (
-        <div className="min-h-[calc(100vh-100px)] p-4 md:p-8 bg-white">
+        <div className="page-shell">
 
             <div className="mb-6 flex flex-col gap-1">
                 <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Departments</h1>
-                    <p className="text-sm text-gray-500">Manage organizational units and distribution centers</p>
+                    <h1 className="page-title">Departments</h1>
+                    <p className="page-subtitle">Manage organizational units and distribution centers</p>
                 </div>
             </div>
 
             <div className="grid gap-8 lg:grid-cols-4">
                 {/* Add Form */}
-                <Card className="lg:col-span-1 h-fit overflow-hidden rounded-2xl border bg-white/70 backdrop-blur-md shadow-sm border-purple-100/50">
+                <Card className="lg:col-span-1 h-fit overflow-hidden">
                     <CardContent className="p-6">
-                        <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                            <Plus className="w-5 h-5 text-purple-600" />
+                        <h2 className="mb-6 flex items-center gap-2 text-lg font-semibold text-foreground">
+                            <Plus className="w-5 h-5 text-[rgb(104,114,176)]" />
                             New Unit
                         </h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Department Name</label>
+                                <label className="control-label ml-0">Department Name</label>
                                 <input
                                     type="text"
                                     value={newName}
                                     onChange={(e) => setNewName(e.target.value)}
                                     placeholder="e.g. Logistics, Food Court"
-                                    className="w-full rounded-xl border bg-white/50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all border-gray-100"
+                                    className="control-input"
                                 />
                             </div>
                             <Button
@@ -132,11 +134,11 @@ export default function DepartmentsPage() {
                 {/* List */}
                 <div className="lg:col-span-3 space-y-6">
                     <div className="flex items-center justify-between px-1">
-                        <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <Store className="w-5 h-5 text-purple-600" />
+                        <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                            <Store className="w-5 h-5 text-[rgb(104,114,176)]" />
                             Existing Units
                         </h2>
-                        <span className="text-xs font-medium text-gray-400">
+                        <span className="text-xs font-medium text-muted-foreground">
                             {departments?.length || 0} Total Departments
                         </span>
                     </div>
@@ -145,33 +147,33 @@ export default function DepartmentsPage() {
                         <ItemSkeleton />
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                            {paginatedDepartments.map((dept) => (
-                                <Card key={dept.id} className="group overflow-hidden rounded-2xl border bg-white/60 backdrop-blur-md transition-all hover:shadow-xl hover:shadow-purple-900/5 border-gray-100 relative">
+                            {paginatedDepartments.map((dept, index) => (
+                                <Card key={dept.id} className={`group soft-gradient-card ${gradientClasses[index % gradientClasses.length]} relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5`}>
                                     <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         {editingId === dept.id ? (
                                             <>
-                                                <button onClick={handleUpdate} className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors">
+                                                <button onClick={handleUpdate} className="rounded-full bg-[rgba(222,238,228,0.86)] p-1.5 text-[rgb(86,140,112)] transition-colors hover:bg-[rgba(222,238,228,1)]">
                                                     <Check className="w-3.5 h-3.5" />
                                                 </button>
-                                                <button onClick={() => setEditingId(null)} className="p-1.5 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+                                                <button onClick={() => setEditingId(null)} className="rounded-full bg-[rgba(246,244,249,0.88)] p-1.5 text-muted-foreground transition-colors hover:bg-white">
                                                     <X className="w-3.5 h-3.5" />
                                                 </button>
                                             </>
                                         ) : deletingId === dept.id ? (
                                             <>
-                                                <button onClick={() => deleteMutation.mutate(dept.id)} className="p-1.5 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors">
+                                                <button onClick={() => deleteMutation.mutate(dept.id)} className="rounded-full bg-[rgba(246,221,223,0.88)] p-1.5 text-[rgb(170,97,112)] transition-colors hover:bg-[rgba(246,221,223,1)]">
                                                     <Check className="w-3.5 h-3.5" />
                                                 </button>
-                                                <button onClick={() => setDeletingId(null)} className="p-1.5 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+                                                <button onClick={() => setDeletingId(null)} className="rounded-full bg-[rgba(246,244,249,0.88)] p-1.5 text-muted-foreground transition-colors hover:bg-white">
                                                     <X className="w-3.5 h-3.5" />
                                                 </button>
                                             </>
                                         ) : (
                                             <>
-                                                <button onClick={() => handleStartEdit(dept)} className="p-1.5 rounded-lg bg-gray-50 text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-all">
+                                                <button onClick={() => handleStartEdit(dept)} className="rounded-full bg-[rgba(246,244,249,0.88)] p-1.5 text-muted-foreground transition-all hover:bg-[rgba(217,223,248,0.7)] hover:text-[rgb(104,114,176)]">
                                                     <Pencil className="w-3.5 h-3.5" />
                                                 </button>
-                                                <button onClick={() => setDeletingId(dept.id)} className="p-1.5 rounded-lg bg-gray-50 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all">
+                                                <button onClick={() => setDeletingId(dept.id)} className="rounded-full bg-[rgba(246,244,249,0.88)] p-1.5 text-muted-foreground transition-all hover:bg-[rgba(246,221,223,0.72)] hover:text-[rgb(170,97,112)]">
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                             </>
@@ -186,16 +188,16 @@ export default function DepartmentsPage() {
                                                     value={editName}
                                                     onChange={(e) => setEditName(e.target.value)}
                                                     onKeyDown={(e) => e.key === 'Enter' && handleUpdate()}
-                                                    className="text-sm font-bold text-gray-900 bg-purple-50/50 border-b border-purple-200 focus:outline-none w-full py-0.5 px-1 rounded"
+                                                    className="w-full rounded-md border-b border-[rgba(199,208,244,0.7)] bg-[rgba(217,223,248,0.45)] px-1 py-0.5 text-sm font-bold text-foreground focus:outline-none"
                                                 />
                                             ) : (
-                                                <span className={`text-sm font-bold text-gray-900 transition-opacity ${deletingId === dept.id ? 'opacity-30' : ''}`}>
+                                                <span className={`text-sm font-bold text-foreground transition-opacity ${deletingId === dept.id ? 'opacity-30' : ''}`}>
                                                     {dept.name}
                                                 </span>
                                             )}
 
                                             <div className="flex items-center gap-3 mt-1">
-                                                <div className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+                                                <div className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
                                                     <Calendar className="w-3 h-3" />
                                                     {new Date(dept.createdAt).toLocaleDateString(undefined, {
                                                         month: 'short',
@@ -206,12 +208,12 @@ export default function DepartmentsPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-                                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-300">
+                                        <div className="flex items-center justify-between border-t border-border/60 pt-2">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
                                                 ID: {dept.id.slice(0, 8)}
                                             </span>
                                             {deletingId === dept.id && (
-                                                <span className="text-[10px] font-bold text-red-500 animate-pulse">
+                                                <span className="animate-pulse text-[10px] font-bold text-[rgb(170,97,112)]">
                                                     Confirm Delete?
                                                 </span>
                                             )}
