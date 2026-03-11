@@ -158,32 +158,7 @@ export class TransactionService {
   }
 
   async remove(id: string, userId: string) {
-    const existing = await this.prisma.transaction.findUnique({
-      where: { id },
-    });
-
-    if (!existing) throw new NotFoundException('Transaction not found');
-
-    return this.prisma.$transaction(async (tx) => {
-      // First delete transaction items
-      await tx.transactionItem.deleteMany({
-        where: { transactionId: id },
-      });
-
-      const transaction = await tx.transaction.delete({
-        where: { id },
-      });
-
-      await this.auditService.log({
-        entityType: EntityType.TRANSACTION,
-        entityId: id,
-        action: AuditAction.DELETE,
-        oldValue: existing as any,
-        performedById: userId,
-      });
-
-      return transaction;
-    });
+    throw new BadRequestException('Transactions cannot be deleted.');
   }
 
   async findAll(query: QueryTransactionDto) {

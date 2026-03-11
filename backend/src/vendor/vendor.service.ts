@@ -58,15 +58,14 @@ export class VendorService {
       throw new NotFoundException('Vendor not found');
     }
 
-    const activeTransaction = await this.prisma.transaction.findFirst({
+    const anyTransaction = await this.prisma.transaction.findFirst({
       where: {
         vendorId: id,
-        status: 'ACTIVE',
       },
     });
 
-    if (activeTransaction) {
-      throw new BadRequestException('Cannot delete: This vendor is currently involved in an active transaction.');
+    if (anyTransaction) {
+      throw new BadRequestException('Cannot delete: This vendor is associated with one or more transactions.');
     }
 
     const vendor = await this.prisma.vendor.update({
