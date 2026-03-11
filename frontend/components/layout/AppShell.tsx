@@ -32,13 +32,13 @@ function SidebarContent({
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="border-b border-white/10 px-5 py-5">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center">
           {!isMobile && (
             <Image
-              src="/logo-w-name.png"
+              src="/outloop-logo.svg"
               alt="Logo"
               width={180}
-              height={80}
+              height={49}
               className="rounded"
             />
           )}

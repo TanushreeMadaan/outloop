@@ -22,12 +22,12 @@ export function ReturnModal({ isOpen, onClose, onSubmit, isSubmitting }: ReturnM
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
+                <DialogHeader className="text-center sm:text-center">
                     <DialogTitle>Mark as Returned</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6 py-2">
                     <div className="space-y-2">
-                        <label htmlFor="actualReturnDate" className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
+                        <label htmlFor="actualReturnDate" className="control-label">
                             Recorded Return Date
                         </label>
                         <div className="relative">
@@ -37,25 +37,25 @@ export function ReturnModal({ isOpen, onClose, onSubmit, isSubmitting }: ReturnM
                                 required
                                 value={actualReturnDate}
                                 onChange={(e) => setActualReturnDate(e.target.value)}
-                                className="w-full rounded-2xl border border-gray-100 bg-gray-50/50 px-4 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all font-medium text-gray-900"
+                                className="control-input"
                             />
                         </div>
                     </div>
 
-                    <DialogFooter className="pt-4 flex-row justify-end gap-3 border-t border-gray-50 -mx-6 px-6">
+                    <DialogFooter className="-mx-6 flex-row justify-center gap-3 border-t border-border/70 px-6 pt-4 sm:justify-center">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="rounded-2xl border-gray-200 text-gray-500 hover:bg-gray-50 font-bold px-6 h-12 shadow-sm transition-all"
+                            className="min-w-28 rounded-[1rem] px-6"
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="rounded-2xl bg-blue-600 text-white hover:bg-blue-700 font-bold px-8 h-12 shadow-lg shadow-blue-200/50 transition-all active:scale-95 flex items-center gap-2"
+                            className="min-w-36 rounded-[1rem] px-8"
                         >
                             {isSubmitting && (
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

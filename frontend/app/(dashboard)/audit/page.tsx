@@ -23,11 +23,29 @@ export default function AuditLogsPage() {
 
     const getActionColor = (action: string) => {
         switch (action.toUpperCase()) {
-            case "CREATE": return "bg-secondary text-foreground border-border";
-            case "UPDATE": return "bg-muted text-foreground border-border";
-            case "DELETE": return "bg-primary text-white border-primary";
-            default: return "bg-muted text-muted-foreground border-border";
+            case "CREATE": return "border-emerald-200 bg-emerald-50 text-emerald-700";
+            case "UPDATE": return "border-amber-200 bg-amber-50 text-amber-700";
+            case "DELETE": return "border-rose-200 bg-rose-50 text-rose-700";
+            default: return "border-border bg-muted text-muted-foreground";
         }
+    };
+
+    const getStateTone = (action: string, type: "previous" | "current") => {
+        if (action === "DELETE") {
+            return type === "previous"
+                ? "border-rose-200 bg-rose-50/80"
+                : "border-rose-100 bg-rose-50/45";
+        }
+
+        if (action === "CREATE") {
+            return type === "previous"
+                ? "border-emerald-100 bg-emerald-50/45"
+                : "border-emerald-200 bg-emerald-50/80";
+        }
+
+        return type === "previous"
+            ? "border-amber-200 bg-amber-50/75"
+            : "border-emerald-200 bg-emerald-50/75";
     };
 
     const toggleExpand = (id: string) => {
@@ -36,13 +54,13 @@ export default function AuditLogsPage() {
         );
     };
 
-    const renderValue = (val: any) => {
+    const renderValue = (val: unknown) => {
         if (val === null || val === undefined) return <span className="text-gray-300 italic">null</span>;
         if (typeof val === "object") return JSON.stringify(val, null, 2);
         return String(val);
     };
 
-    const getDelta = (oldValue: any, newValue: any) => {
+    const getDelta = (oldValue: unknown, newValue: unknown) => {
         if (!oldValue || !newValue || typeof oldValue !== "object" || typeof newValue !== "object") {
             return null;
         }
@@ -207,10 +225,10 @@ export default function AuditLogsPage() {
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-top-4 duration-500">
                                                             <div className="space-y-4">
                                                                 <h4 className="ml-1 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                                                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                                                    <div className={`h-1.5 w-1.5 rounded-full ${log.action === "DELETE" ? "bg-rose-500" : log.action === "CREATE" ? "bg-emerald-500" : "bg-amber-500"}`} />
                                                                     Previous State
                                                                 </h4>
-                                                                <div className="rounded-3xl border border-border bg-muted/50 p-6">
+                                                                <div className={`rounded-3xl border p-6 ${getStateTone(log.action, "previous")}`}>
                                                                     {log.action === "UPDATE" && log.oldValue && log.newValue ? (
                                                                         (() => {
                                                                             const delta = getDelta(log.oldValue, log.newValue);
@@ -257,7 +275,7 @@ export default function AuditLogsPage() {
                                                                         </div>
                                                                     ) : (
                                                                         <div className="flex flex-col items-center justify-center py-6 text-center space-y-2">
-                                                                            <ShieldCheck className="w-6 h-6 text-primary/35" />
+                                                                            <ShieldCheck className="w-6 h-6 text-emerald-300" />
                                                                             <span className="text-[11px] font-bold uppercase italic text-muted-foreground">Entry Created</span>
                                                                         </div>
                                                                     )}
@@ -266,10 +284,10 @@ export default function AuditLogsPage() {
 
                                                             <div className="space-y-4">
                                                                 <h4 className="ml-1 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                                                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                                                    <div className={`h-1.5 w-1.5 rounded-full ${log.action === "DELETE" ? "bg-rose-500" : log.action === "CREATE" ? "bg-emerald-500" : "bg-amber-500"}`} />
                                                                     Current State
                                                                 </h4>
-                                                                <div className="rounded-3xl border border-border bg-secondary/28 p-6">
+                                                                <div className={`rounded-3xl border p-6 ${getStateTone(log.action, "current")}`}>
                                                                     {log.action === "UPDATE" && log.oldValue && log.newValue ? (
                                                                         (() => {
                                                                             const delta = getDelta(log.oldValue, log.newValue);
@@ -316,7 +334,7 @@ export default function AuditLogsPage() {
                                                                         </div>
                                                                     ) : (
                                                                         <div className="flex flex-col items-center justify-center py-6 text-center space-y-2">
-                                                                            <Clock className="w-6 h-6 text-primary/35" />
+                                                                            <Clock className="w-6 h-6 text-rose-300" />
                                                                             <span className="text-[11px] font-bold uppercase italic text-muted-foreground">Entry Deleted</span>
                                                                         </div>
                                                                     )}

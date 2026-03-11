@@ -34,11 +34,11 @@ export function DateRangePicker({
                         id="date"
                         variant={"outline"}
                         className={cn(
-                            "w-full justify-start rounded-[1.2rem] border-white/70 bg-white/72 px-4 py-6 text-left text-xs font-medium text-foreground transition-all focus:ring-2 focus:ring-ring/35",
+                            "w-full justify-start rounded-[1.2rem] border-border bg-white px-4 py-6 text-left text-xs font-medium text-foreground shadow-sm transition-all focus:ring-2 focus:ring-ring/20",
                             !date && "text-muted-foreground"
                         )}
                     >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-[rgb(130,141,193)]" />
+                        <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
                         {date?.from ? (
                             date.to ? (
                                 <>
@@ -53,7 +53,7 @@ export function DateRangePicker({
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto overflow-hidden rounded-[1.65rem] border-white/75 p-0" align="start">
+                <PopoverContent className="w-auto overflow-hidden rounded-[1.65rem] border-border bg-white p-0 shadow-[0_24px_56px_-36px_rgba(2,43,58,0.22)]" align="start">
                     <Calendar
                         initialFocus
                         mode="range"
