@@ -30,8 +30,20 @@ export class DepartmentService {
   findAll() {
     return this.prisma.department.findMany({
       where: { deletedAt: null },
+      include: {
+        _count: {
+          select: {
+            transactions: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
-    });
+    }).then((departments) =>
+      departments.map(({ _count, ...department }) => ({
+        ...department,
+        canDelete: _count.transactions === 0,
+      })),
+    );
   }
 
   async update(id: string, data: { name: string }, userId: string) {

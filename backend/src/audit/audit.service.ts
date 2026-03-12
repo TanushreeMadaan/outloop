@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditAction, EntityType, Prisma } from '@prisma/client';
 import { QueryAuditDto } from './dto/query-audit.dto';
+import { RequestContext } from '../common/request-context';
 
 @Injectable()
 export class AuditService {
@@ -14,7 +15,11 @@ export class AuditService {
     performedById: string;
     oldValue?: Prisma.InputJsonValue;
     newValue?: Prisma.InputJsonValue;
+    ipAddress?: string | null;
+    macAddress?: string | null;
   }) {
+    const requestMetadata = RequestContext.get();
+
     return this.prisma.auditLog.create({
       data: {
         entityType: params.entityType,
@@ -23,6 +28,8 @@ export class AuditService {
         oldValue: params.oldValue,
         newValue: params.newValue,
         performedById: params.performedById,
+        ipAddress: params.ipAddress ?? requestMetadata?.ipAddress ?? null,
+        macAddress: params.macAddress ?? requestMetadata?.macAddress ?? null,
       },
     });
   }

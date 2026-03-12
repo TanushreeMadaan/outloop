@@ -6,6 +6,7 @@ export interface Vendor {
     phoneNo?: string;
     gstNumber?: string;
     createdAt: string;
+    canDelete?: boolean;
 }
 
 export interface Item {
@@ -13,12 +14,14 @@ export interface Item {
     name: string;
     description?: string;
     createdAt: string;
+    canDelete?: boolean;
 }
 
 export interface Department {
     id: string;
     name: string;
     createdAt: string;
+    canDelete?: boolean;
 }
 
 export type TransactionStatus = 'ACTIVE' | 'COMPLETED';

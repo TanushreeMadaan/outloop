@@ -21,8 +21,11 @@ export class TransactionController {
   }
 
   @Get()
-  findAll(@Query() query: QueryTransactionDto) {
-    return this.transactionService.findAll(query);
+  findAll(
+    @Query() query: QueryTransactionDto,
+    @Req() req: Request & { user: AuthUser },
+  ) {
+    return this.transactionService.findAll(query, req.user);
   }
 
   @Patch(':id')

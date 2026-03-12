@@ -6,6 +6,8 @@ export interface AuditLog {
     entityId: string;
     action: string;
     performedById: string;
+    ipAddress?: string | null;
+    macAddress?: string | null;
     oldValue: any;
     newValue: any;
     createdAt: string;

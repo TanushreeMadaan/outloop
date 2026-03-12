@@ -15,8 +15,20 @@ export class VendorService {
   findAll() {
     return this.prisma.vendor.findMany({
       where: { deletedAt: null },
+      include: {
+        _count: {
+          select: {
+            transactions: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
-    });
+    }).then((vendors) =>
+      vendors.map(({ _count, ...vendor }) => ({
+        ...vendor,
+        canDelete: _count.transactions === 0,
+      })),
+    );
   }
 
   async create(data: CreateVendorDto, userId: string) {

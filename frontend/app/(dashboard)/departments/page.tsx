@@ -11,6 +11,7 @@ import { Plus, Store, Calendar, Pencil, Trash2, Check, X, Loader2 } from "lucide
 import { ItemSkeleton } from "@/components/ItemSkeleton";
 import { Department } from "@/types";
 import { Pagination } from "@/components/Pagination";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 
 export default function DepartmentsPage() {
     const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export default function DepartmentsPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState("");
-    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [departmentToDelete, setDepartmentToDelete] = useState<Department | null>(null);
     const [page, setPage] = useState(1);
     const pageSize = 9;
 
@@ -57,11 +58,11 @@ export default function DepartmentsPage() {
         mutationFn: (id: string) => deleteDepartment(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["departments"] });
-            setDeletingId(null);
+            setDepartmentToDelete(null);
             toast.success("Department deleted successfully");
         },
         onError: (error: any) => {
-            setDeletingId(null);
+            setDepartmentToDelete(null);
             toast.error(error.response?.data?.message || "Failed to delete department");
         }
     });
@@ -76,6 +77,14 @@ export default function DepartmentsPage() {
     const handleStartEdit = (dept: Department) => {
         setEditingId(dept.id);
         setEditName(dept.name);
+    };
+
+    const handleDelete = (dept: Department) => {
+        if (dept.canDelete === false) {
+            toast.error("This department is associated with transactions and cannot be deleted.");
+            return;
+        }
+        setDepartmentToDelete(dept);
     };
 
     const handleUpdate = () => {
@@ -157,21 +166,12 @@ export default function DepartmentsPage() {
                                                     <X className="w-3.5 h-3.5" />
                                                 </button>
                                             </>
-                                        ) : deletingId === dept.id ? (
-                                            <>
-                                                <button onClick={() => deleteMutation.mutate(dept.id)} className="rounded-full bg-[rgba(246,221,223,0.88)] p-1.5 text-[rgb(170,97,112)] transition-colors hover:bg-[rgba(246,221,223,1)]">
-                                                    <Check className="w-3.5 h-3.5" />
-                                                </button>
-                                                <button onClick={() => setDeletingId(null)} className="rounded-full bg-[rgba(246,244,249,0.88)] p-1.5 text-muted-foreground transition-colors hover:bg-white">
-                                                    <X className="w-3.5 h-3.5" />
-                                                </button>
-                                            </>
                                         ) : (
                                             <>
                                                 <button onClick={() => handleStartEdit(dept)} className="rounded-full bg-[rgba(246,244,249,0.88)] p-1.5 text-muted-foreground transition-all hover:bg-[rgba(217,223,248,0.7)] hover:text-[rgb(104,114,176)]">
                                                     <Pencil className="w-3.5 h-3.5" />
                                                 </button>
-                                                <button onClick={() => setDeletingId(dept.id)} className="rounded-full bg-[rgba(246,244,249,0.88)] p-1.5 text-muted-foreground transition-all hover:bg-[rgba(246,221,223,0.72)] hover:text-[rgb(170,97,112)]">
+                                                <button onClick={() => handleDelete(dept)} className="rounded-full bg-[rgba(246,244,249,0.88)] p-1.5 text-muted-foreground transition-all hover:bg-[rgba(246,221,223,0.72)] hover:text-[rgb(170,97,112)]">
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                             </>
@@ -189,7 +189,7 @@ export default function DepartmentsPage() {
                                                     className="w-full rounded-md border-b border-[rgba(199,208,244,0.7)] bg-[rgba(217,223,248,0.45)] px-1 py-0.5 text-sm font-bold text-foreground focus:outline-none"
                                                 />
                                             ) : (
-                                                <span className={`text-sm font-bold text-foreground transition-opacity ${deletingId === dept.id ? 'opacity-30' : ''}`}>
+                                                <span className="text-sm font-bold text-foreground transition-opacity">
                                                     {dept.name}
                                                 </span>
                                             )}
@@ -210,11 +210,6 @@ export default function DepartmentsPage() {
                                             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
                                                 ID: {dept.id.slice(0, 8)}
                                             </span>
-                                            {deletingId === dept.id && (
-                                                <span className="animate-pulse text-[10px] font-bold text-[rgb(170,97,112)]">
-                                                    Confirm Delete?
-                                                </span>
-                                            )}
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -230,6 +225,22 @@ export default function DepartmentsPage() {
                     />
                 </div>
             </div>
+
+            <ConfirmDeleteDialog
+                open={Boolean(departmentToDelete)}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setDepartmentToDelete(null);
+                    }
+                }}
+                title="Delete department?"
+                description={`This will permanently remove ${departmentToDelete?.name || "this department"} if it is not linked to existing transactions.`}
+                onConfirm={() => {
+                    if (!departmentToDelete) return;
+                    deleteMutation.mutate(departmentToDelete.id);
+                }}
+                isPending={deleteMutation.isPending}
+            />
         </div>
     );
 }

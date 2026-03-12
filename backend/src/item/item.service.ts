@@ -29,8 +29,20 @@ export class ItemService {
   findAll() {
     return this.prisma.item.findMany({
       where: { deletedAt: null },
+      include: {
+        _count: {
+          select: {
+            transactionItems: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
-    });
+    }).then((items) =>
+      items.map(({ _count, ...item }) => ({
+        ...item,
+        canDelete: _count.transactionItems === 0,
+      })),
+    );
   }
 
   async update(id: string, data: UpdateItemDto, userId: string) {

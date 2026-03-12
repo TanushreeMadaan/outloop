@@ -8,6 +8,7 @@ import { getMe } from "@/lib/api/auth"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu, LogOut, User, LayoutDashboard, Store, Package, Repeat, Activity, BarChart3 } from "lucide-react"
+import { useEffect, useState } from "react"
 
 type NavItem = {
   href: string
@@ -99,16 +100,31 @@ export default function AppShell({
 }) {
   const pathname = usePathname()
   const router = useRouter()
+  const [hasToken, setHasToken] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+
+    if (!token) {
+      router.replace("/login")
+      return
+    }
+
+    setHasToken(true)
+    setIsCheckingAuth(false)
+  }, [router])
 
   const { data: user } = useQuery({
     queryKey: ["me"],
     queryFn: getMe,
     retry: false,
+    enabled: hasToken,
   })
 
   const handleLogout = () => {
     localStorage.removeItem("token")
-    router.push("/login")
+    router.replace("/login")
   }
 
   const navItems = [
@@ -123,6 +139,10 @@ export default function AppShell({
   ]
 
   const filteredNavItems = navItems.filter(item => !item.adminOnly || user?.role === 'ADMIN')
+
+  if (isCheckingAuth || !hasToken) {
+    return null
+  }
 
   return (
     <div className="relative flex min-h-screen bg-transparent font-[family-name:var(--font-geist-sans)] text-foreground">

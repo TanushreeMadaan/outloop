@@ -14,6 +14,7 @@ import { DateRangePicker } from "@/components/DateRangePicker";
 import { DateRange } from "react-day-picker";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search } from "lucide-react";
+import { getMe } from "@/lib/api/auth";
 
 function formatDate(date?: string) {
     if (!date) return "-";
@@ -53,6 +54,11 @@ export default function TransactionsPage() {
     const [page, setPage] = useState(1);
     const pageSize = 10;
 
+    const { data: user, isLoading: isLoadingUser } = useQuery({
+        queryKey: ["me"],
+        queryFn: getMe,
+    });
+
     const { data: transactionsRes, isLoading, isFetched } = useQuery({
         queryKey: ["transactions"],
         queryFn: () => getTransactions(),
@@ -91,6 +97,8 @@ export default function TransactionsPage() {
 
     const filteredTransactions = useMemo(() => {
         const q = searchQuery.toLowerCase();
+        const userDepartmentId = user?.departmentId ?? user?.department?.id;
+        const userDepartmentName = user?.department?.name?.toLowerCase();
 
         const startDate: Date | null = dateRange?.from || null;
         let endExclusive: Date | null = null;
@@ -100,6 +108,20 @@ export default function TransactionsPage() {
         }
 
         return transactions.filter((t: Transaction) => {
+            if (!user) return false;
+            if (user.role !== "ADMIN") {
+                const sameDepartmentById = Boolean(userDepartmentId && t.departmentId === userDepartmentId);
+                const sameDepartmentByName = Boolean(
+                    userDepartmentName &&
+                    t.department?.name &&
+                    t.department.name.toLowerCase() === userDepartmentName
+                );
+
+                if (!sameDepartmentById && !sameDepartmentByName) {
+                    return false;
+                }
+            }
+
             const createdAt = new Date(t.createdAt);
 
             // Date filtering
@@ -121,7 +143,7 @@ export default function TransactionsPage() {
                 t.remarks?.toLowerCase().includes(q)
             );
         });
-    }, [transactions, searchQuery, dateRange, statusFilter]);
+    }, [transactions, searchQuery, dateRange, statusFilter, user]);
 
     const paginatedTransactions = useMemo(() => {
         const start = (page - 1) * pageSize;
@@ -227,7 +249,7 @@ export default function TransactionsPage() {
                 </div>
             </div>
 
-            {isLoading ? (
+            {isLoading || isLoadingUser ? (
                 <div className="table-shell">
                     <div className="p-4">
                         <TableSkeleton columns={7} rows={8} />

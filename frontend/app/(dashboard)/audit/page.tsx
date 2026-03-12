@@ -192,7 +192,9 @@ export default function AuditLogsPage() {
                                                         </div>
                                                         <div className="flex flex-col">
                                                             <span className="text-xs font-bold text-foreground/80">{log.performedBy?.email || "System-Admin"}</span>
-                                                            <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Verified User</span>
+                                                            <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                                                                IP {log.ipAddress || "Unavailable"}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </td>

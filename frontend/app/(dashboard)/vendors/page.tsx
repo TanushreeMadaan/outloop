@@ -12,12 +12,14 @@ import { Vendor } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/Pagination";
 import { Search } from "lucide-react";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 
 export default function VendorsPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [vendorToDelete, setVendorToDelete] = useState<Vendor | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 12;
 
@@ -91,10 +93,12 @@ export default function VendorsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this vendor?")) {
-      deleteMutation.mutate(id);
+  const handleDelete = (vendor: Vendor) => {
+    if (vendor.canDelete === false) {
+      toast.error("This vendor is associated with transactions and cannot be deleted.");
+      return;
     }
+    setVendorToDelete(vendor);
   };
 
   const handleModalSubmit = (data: any) => {
@@ -165,7 +169,7 @@ export default function VendorsPage() {
                         </svg>
                       </button>
                       <button
-                        onClick={() => handleDelete(vendor.id)}
+                        onClick={() => handleDelete(vendor)}
                         className="rounded-full p-2 text-muted-foreground transition hover:bg-primary/12 hover:text-primary"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -250,6 +254,24 @@ export default function VendorsPage() {
           (updateMutation.error as any)?.response?.data?.message ||
           null
         }
+      />
+
+      <ConfirmDeleteDialog
+        open={Boolean(vendorToDelete)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setVendorToDelete(null);
+          }
+        }}
+        title="Delete vendor?"
+        description={`This will permanently remove ${vendorToDelete?.name || "this vendor"} from your vendors list.`}
+        onConfirm={() => {
+          if (!vendorToDelete) return;
+          deleteMutation.mutate(vendorToDelete.id, {
+            onSuccess: () => setVendorToDelete(null),
+          });
+        }}
+        isPending={deleteMutation.isPending}
       />
     </div>
   );

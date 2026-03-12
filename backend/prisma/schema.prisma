@@ -109,5 +109,7 @@ model AuditLog {
   oldValue      Json?
   newValue      Json?
   performedById String
+  ipAddress     String?
+  macAddress    String?
   createdAt     DateTime @default(now())
 }

@@ -10,6 +10,7 @@ import { QueryTransactionDto } from './dto/query-transaction.dto';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction, EntityType } from '@prisma/client';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { AuthUser } from '../auth/auth-user.interface';
 
 @Injectable()
 export class TransactionService {
@@ -18,8 +19,31 @@ export class TransactionService {
     private auditService: AuditService,
   ) { }
 
+  private deriveLifecycleState(params: {
+    isReturnable: boolean;
+    expectedReturnDate?: string | Date | null;
+    actualReturnDate?: string | Date | null;
+  }) {
+    const expectedReturnDate = params.isReturnable
+      ? params.expectedReturnDate ?? null
+      : null;
+    const actualReturnDate = params.isReturnable
+      ? params.actualReturnDate ?? null
+      : null;
+
+    return {
+      expectedReturnDate,
+      actualReturnDate,
+      status: params.isReturnable && !actualReturnDate ? 'ACTIVE' : 'COMPLETED',
+    } as const;
+  }
+
   async create(data: CreateTransactionDto, userId: string) {
     const { vendorId, departmentId, itemIds, isReturnable, remarks, expectedReturnDate } = data;
+    const lifecycle = this.deriveLifecycleState({
+      isReturnable,
+      expectedReturnDate,
+    });
 
     // Validating vendor
     const vendor = await this.prisma.vendor.findUnique({
@@ -51,9 +75,10 @@ export class TransactionService {
           vendorId,
           departmentId,
           isReturnable,
-          status: isReturnable ? 'ACTIVE' : 'COMPLETED',
+          status: lifecycle.status,
           remarks,
-          expectedReturnDate,
+          expectedReturnDate: lifecycle.expectedReturnDate,
+          actualReturnDate: lifecycle.actualReturnDate,
           createdById: userId,
         },
       });
@@ -91,10 +116,25 @@ export class TransactionService {
 
     const result = await this.prisma.$transaction(async (tx) => {
       const { itemIds, ...otherData } = data;
+      const nextIsReturnable = data.isReturnable ?? existing.isReturnable;
+      const lifecycle = this.deriveLifecycleState({
+        isReturnable: nextIsReturnable,
+        expectedReturnDate:
+          data.expectedReturnDate !== undefined
+            ? data.expectedReturnDate
+            : existing.expectedReturnDate,
+        actualReturnDate: existing.actualReturnDate,
+      });
 
       const transaction = await tx.transaction.update({
         where: { id },
-        data: otherData,
+        data: {
+          ...otherData,
+          isReturnable: nextIsReturnable,
+          expectedReturnDate: lifecycle.expectedReturnDate,
+          actualReturnDate: lifecycle.actualReturnDate,
+          status: lifecycle.status,
+        },
       });
 
       if (itemIds) {
@@ -137,11 +177,17 @@ export class TransactionService {
     if (!existing) throw new NotFoundException('Transaction not found');
     if (!existing.isReturnable) throw new BadRequestException('Only returnable transactions can be marked as returned');
 
+    const lifecycle = this.deriveLifecycleState({
+      isReturnable: existing.isReturnable,
+      expectedReturnDate: existing.expectedReturnDate,
+      actualReturnDate,
+    });
+
     const result = await this.prisma.transaction.update({
       where: { id },
       data: {
-        status: 'COMPLETED',
-        actualReturnDate,
+        status: lifecycle.status,
+        actualReturnDate: lifecycle.actualReturnDate,
       },
     });
 
@@ -161,7 +207,7 @@ export class TransactionService {
     throw new BadRequestException('Transactions cannot be deleted.');
   }
 
-  async findAll(query: QueryTransactionDto) {
+  async findAll(query: QueryTransactionDto, user: AuthUser) {
     const {
       page = 1,
       limit = 10,
@@ -188,6 +234,22 @@ export class TransactionService {
 
     if (departmentId) {
       where.departmentId = departmentId;
+    }
+
+    if (user.role !== 'ADMIN') {
+      if (!user.departmentId) {
+        return {
+          data: [],
+          meta: {
+            total: 0,
+            page,
+            limit,
+            totalPages: 0,
+          },
+        };
+      }
+
+      where.departmentId = user.departmentId;
     }
 
     const [data, total] = await Promise.all([
