@@ -13,6 +13,7 @@ import { TableSkeleton } from "@/components/TableSkeleton";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import { DateRange } from "react-day-picker";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search } from "lucide-react";
 
 function formatDate(date?: string) {
     if (!date) return "-";
@@ -182,9 +183,7 @@ export default function TransactionsPage() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div className="flex-1">
                         <div className="relative">
-                            <svg className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                            <Search className="control-input-icon" />
                             <input
                                 type="text"
                                 placeholder="Search by vendor, department or remarks..."
@@ -193,7 +192,7 @@ export default function TransactionsPage() {
                                     setSearchQuery(e.target.value);
                                     setPage(1);
                                 }}
-                                className="control-input pl-11"
+                                className="control-input control-input-with-icon h-14 font-medium"
                             />
                         </div>
                     </div>

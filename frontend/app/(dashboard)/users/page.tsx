@@ -99,11 +99,11 @@ export default function UsersPage() {
             </div>
 
             <div className="relative group">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-[rgb(104,114,176)]" />
+                <Search className="control-input-icon transition-colors group-focus-within:text-[rgb(104,114,176)]" />
                 <input
                     type="text"
                     placeholder="Search by email or department..."
-                    className="control-input h-14 pl-12 pr-4 font-medium"
+                    className="control-input control-input-with-icon h-14 font-medium"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />

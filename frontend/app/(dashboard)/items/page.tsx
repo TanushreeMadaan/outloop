@@ -10,6 +10,7 @@ import { ItemSkeleton } from "@/components/ItemSkeleton";
 import { Item } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/Pagination";
+import { Search } from "lucide-react";
 
 export default function ItemsPage() {
     const queryClient = useQueryClient();
@@ -114,7 +115,8 @@ export default function ItemsPage() {
                 </Button>
             </div>
 
-            <div className="mb-6">
+            <div className="relative mb-6 group">
+                <Search className="control-input-icon transition-colors group-focus-within:text-[rgb(104,114,176)]" />
                 <input
                     type="text"
                     placeholder="Search by name or description..."
@@ -123,7 +125,7 @@ export default function ItemsPage() {
                         setSearchQuery(e.target.value);
                         setPage(1);
                     }}
-                    className="control-input"
+                    className="control-input control-input-with-icon h-14 font-medium"
                 />
             </div>
 
